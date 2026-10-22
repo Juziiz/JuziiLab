@@ -13,7 +13,17 @@ ORIGIN = 'https://kelvinlab.wuyra.com'
 RAW = 'https://raw.githubusercontent.com/Juziiz/JuziiLab/main'
 REPO_PAGE = 'https://github.com/Juziiz/JuziiLab'
 ROOT = os.path.dirname(os.path.abspath(__file__))
-HEADERS = {'Referer': ORIGIN + '/', 'User-Agent': 'curl/8.5.0'}
+HEADERS = {
+    'Referer': ORIGIN + '/',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/json,*/*',
+    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'sec-ch-ua': '"Chromium";v="126", "Google Chrome";v="126", "Not-A.Brand";v="24"',
+    'sec-ch-ua-platform': '"macOS"',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'same-origin',
+}
 
 def fetch(url, timeout=40):
     req = urllib.request.Request(url, headers=HEADERS)
