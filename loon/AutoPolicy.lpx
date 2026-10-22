@@ -5,9 +5,9 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/WiFi.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/WiFi.png
 #!date=2025-03-30 21:50:17
 
 [Script]
-network-changed script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/raw.githubusercontent.com/Peng-YM/QuanX/master/Tools/AutoPolicy/auto-policy.js
+network-changed script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/raw.githubusercontent.com/Peng-YM/QuanX/master/Tools/AutoPolicy/auto-policy.js

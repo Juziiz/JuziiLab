@@ -5,8 +5,8 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/App_icon/120px/YangShiPin.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/App_icon/120px/YangShiPin.png
 #!date=2025-07-12 00:20:00
 
 [Rewrite]
@@ -16,7 +16,7 @@
 ^https?:\/\/cdn\.cmgadx\.com\/sdk\/pool\/.+\.json - reject-dict
 
 [Script]
-http-request ^http:\/\/(liveinfo|bkliveinfo|playvv)\.ysp\.cctv\.cn\/(playvinfo\?.+|.*) script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/Yangshipin/Yangshipin_remove_ads.js, timeout=60, tag=央视频去广告
+http-request ^http:\/\/(liveinfo|bkliveinfo|playvv)\.ysp\.cctv\.cn\/(playvinfo\?.+|.*) script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/Yangshipin/Yangshipin_remove_ads.js, timeout=60, tag=央视频去广告
 
 [MITM]
 hostname=*.ysp.cctv.cn, cdn.cmgadx.com

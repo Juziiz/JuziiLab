@@ -5,9 +5,9 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/IPPure.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/IPPure.png
 #!date=2025-12-29 15:22:00
 
 [Script]
-generic script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/Tools/IPPure2.js, timeout=15, tag=节点纯净度检测,img-url=globe.asia.australia.system
+generic script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/Tools/IPPure2.js, timeout=15, tag=节点纯净度检测,img-url=globe.asia.australia.system

@@ -8,9 +8,9 @@
 #!arguments-desc=- 屏蔽参数：[true, false] \n- 语言代码：[ off, zh-Hans, zh-Hant, ja, ko, en] \n语言代码遵循 Google Translate Languages Codes, 当填入 off 时关闭翻译。
 
 [Script]
-youtube.response = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/(youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config))(\?(.*))?$,requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/YouTube/Youtube.response.js,argument="{"blockUpload":{{{隐藏上传按钮}}},"blockShorts":{{{隐藏短视频按钮}}},"captionLang":"{{{字幕翻译语言}}}"}"
-youtube.request.init = type=http-request,pattern=^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&ack.*,requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/YouTube/Youtube.request.js,argument="{"captionLang":"{{{字幕翻译语言}}}"}"
-youtube.request.log_event = type=http-request,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/log_event,requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/YouTube/Youtube.request.js
+youtube.response = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/(youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch|log_event|config))(\?(.*))?$,requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/YouTube/Youtube.response.js,argument="{"blockUpload":{{{隐藏上传按钮}}},"blockShorts":{{{隐藏短视频按钮}}},"captionLang":"{{{字幕翻译语言}}}"}"
+youtube.request.init = type=http-request,pattern=^https?:\/\/[\w-]+\.googlevideo\.com\/initplayback.+&ack.*,requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/YouTube/Youtube.request.js,argument="{"captionLang":"{{{字幕翻译语言}}}"}"
+youtube.request.log_event = type=http-request,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/log_event,requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/YouTube/Youtube.request.js
 
 
 

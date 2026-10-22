@@ -5,8 +5,8 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/App_icon/120px/JD.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/App_icon/120px/JD.png
 #!date=2026-02-02 20:35:00
 
 [Rule]
@@ -23,8 +23,8 @@ URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT
 ^https?:\/\/m\.360buyimg\.com\/mobilecms\/s1125x2436_jfs reject-200
 
 [Script]
-http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path = https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/JD/JD_remove_ads.js, requires-body = true, tag = 移除京东广告
-http-response ^https?:\/\/in\.m\.jd\.com\/product\/graphext\/\d+\.html script-path = https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/JD/JD_Price.js, requires-body = true, tag = 京东比价
+http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path = https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/JD/JD_remove_ads.js, requires-body = true, tag = 移除京东广告
+http-response ^https?:\/\/in\.m\.jd\.com\/product\/graphext\/\d+\.html script-path = https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/JD/JD_Price.js, requires-body = true, tag = 京东比价
 
 [MITM]
 hostname=in.m.jd.com, m.360buyimg.com

@@ -5,8 +5,8 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/HTTPDNS.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/HTTPDNS.png
 #!date=2026-10-02 13:57:49
 
 [Rule]

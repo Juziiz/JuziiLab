@@ -5,8 +5,8 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/App_icon/120px/Spotify.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/App_icon/120px/Spotify.png
 #!date=2026-03-20 18:05:00
 
 [Rewrite]
@@ -14,7 +14,7 @@
 ^https:\/\/(?:\w+-spclient|spclient\.wg)\.spotify\.com(?::443)?\/artistview\/v1\/artist\/(.*)&platform=iphone header https://spclient.wg.spotify.com/artistview/v1/artist/$1&platform=ipad
 
 [Script]
-http-response ^https:\/\/(?:\w+-spclient|spclient\.wg)\.spotify\.com(?::443)?\/(?:bootstrap|user-customization-service) script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/Spotify/Spotify_remove_ads.js, requires-body=true, binary-body-mode=true, timeout=3, tag=Protobuf
+http-response ^https:\/\/(?:\w+-spclient|spclient\.wg)\.spotify\.com(?::443)?\/(?:bootstrap|user-customization-service) script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/Spotify/Spotify_remove_ads.js, requires-body=true, binary-body-mode=true, timeout=3, tag=Protobuf
 
 [MitM]
 hostname=*-spclient.spotify.com, spclient.wg.spotify.com

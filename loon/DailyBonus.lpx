@@ -5,8 +5,8 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.4.0(962)
-#!homepage=https://github.com/Juziiz/Juzii
-#!icon=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/DailyBonus.png
+#!homepage=https://github.com/Juziiz/JuziiLab
+#!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/Tool_icon/120px/DailyBonus.png
 #!date=2025-07-09 09:44:00
 
 [Argument]
@@ -40,17 +40,17 @@ WechatPay_CRONEXP = input,"0 12 * * *",tag=支付有优惠定时参数,desc=这�
 
 [Script]
 # B站
-http-response ^https?:\/\/app\.bilibili\.com\/x\/resource\/fingerprint\? script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/raw.githubusercontent.com/ClydeTime/BiliBili/main/js/BiliBiliDailyBonus.js, timeout=30,tag=B站Cookie(扫码),enable={BiliBili_Cookie_QR}
-http-request ^https?:\/\/app\.bilibili\.com\/x\/resource\/fingerprint\? script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/raw.githubusercontent.com/ClydeTime/BiliBili/main/js/BiliBiliDailyBonus.js,tag=B站Cookie(APP),enable={BiliBili_Cookie_APP}
-cron {BiliBili_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/raw.githubusercontent.com/ClydeTime/BiliBili/main/js/BiliBiliDailyBonus.js,tag=B站每日等级任务,enable={BiliBili_DailyBonus}
+http-response ^https?:\/\/app\.bilibili\.com\/x\/resource\/fingerprint\? script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/raw.githubusercontent.com/ClydeTime/BiliBili/main/js/BiliBiliDailyBonus.js, timeout=30,tag=B站Cookie(扫码),enable={BiliBili_Cookie_QR}
+http-request ^https?:\/\/app\.bilibili\.com\/x\/resource\/fingerprint\? script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/raw.githubusercontent.com/ClydeTime/BiliBili/main/js/BiliBiliDailyBonus.js,tag=B站Cookie(APP),enable={BiliBili_Cookie_APP}
+cron {BiliBili_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/raw.githubusercontent.com/ClydeTime/BiliBili/main/js/BiliBiliDailyBonus.js,tag=B站每日等级任务,enable={BiliBili_DailyBonus}
 
 # 叮咚买菜
 # http-request ^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home\?api_version requires-body=1,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js,tag=叮咚买菜Cookie,enable={Dingdong_Cookie}
 # cron {Dingdong_CRONEXP} script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js,tag=叮咚买菜每日签到,enable={Dingdong_DailyBonus}
 
 # 蜜雪冰城
-http-response ^https:\/\/mxsa\.mxbc\.net\/api\/v1\/customer\/info script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/DailyBonus/Mixue.js,requires-body=true, timeout=60,tag=蜜雪冰城Cookie,enable={Mixue_Cookie}
-cron {Mixue_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/resource.wuyra.com/Script/DailyBonus/Mixue.js,tag=蜜雪冰城每日签到,enable={Mixue_DailyBonus}
+http-response ^https:\/\/mxsa\.mxbc\.net\/api\/v1\/customer\/info script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/DailyBonus/Mixue.js,requires-body=true, timeout=60,tag=蜜雪冰城Cookie,enable={Mixue_Cookie}
+cron {Mixue_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/DailyBonus/Mixue.js,tag=蜜雪冰城每日签到,enable={Mixue_DailyBonus}
 
 # Soul
 http-request ^https:\/\/increase-openapi\.soulapp\.cn\/increase\/sign\/userSign script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/SoulSing.js,timeout=60, tag=SoulCookie
@@ -61,16 +61,16 @@ http-response ^https:\/\/gw\.xiaocantech\.com\/rpc script-path=https://gist.gith
 cron {Xiaocan_CRONEXP} script-path=https://gist.githubusercontent.com/Sliverkiss/250a02315f0a2c99f42da3b3573375c8/raw,tag=小蚕霸王餐签到,enable={Xiaocan_DailyBonus}
 
 # 晓晓优选
-http-response ^https:\/\/xxyx-client-api\.xiaoxiaoyouxuan\.com\/my script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/gist.githubusercontent.com/Sliverkiss/991a81be1fc8cf2a1937432be68f5521/raw/xxyx.js, requires-body=true, timeout=60, tag=晓晓优选Cookie,enable={Xiaoxiao_Cookie}
-cron {Xiaoxiao_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/gist.githubusercontent.com/Sliverkiss/991a81be1fc8cf2a1937432be68f5521/raw/xxyx.js,tag=晓晓优选签到,enable={Xiaoxiao_DailyBonus}
+http-response ^https:\/\/xxyx-client-api\.xiaoxiaoyouxuan\.com\/my script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/gist.githubusercontent.com/Sliverkiss/991a81be1fc8cf2a1937432be68f5521/raw/xxyx.js, requires-body=true, timeout=60, tag=晓晓优选Cookie,enable={Xiaoxiao_Cookie}
+cron {Xiaoxiao_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/gist.githubusercontent.com/Sliverkiss/991a81be1fc8cf2a1937432be68f5521/raw/xxyx.js,tag=晓晓优选签到,enable={Xiaoxiao_DailyBonus}
 
 # 歪麦霸王餐
-http-request ^https:\/\/wmapp-api\.waimaimingtang\.com\/api\/api\/v2\/user\/api_user_info_one script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/gist.githubusercontent.com/Sliverkiss/49a9ffb2169a2becc33bf4fdbf6eb99a/raw/wmbwc.js, requires-body=true, timeout=60, tag=歪麦霸王餐Cookie,enable={Waimai_Cookie}
-cron {Waimai_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/gist.githubusercontent.com/Sliverkiss/49a9ffb2169a2becc33bf4fdbf6eb99a/raw/wmbwc.js,tag=歪麦霸王餐签到,enable={Waimai_DailyBonus}
+http-request ^https:\/\/wmapp-api\.waimaimingtang\.com\/api\/api\/v2\/user\/api_user_info_one script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/gist.githubusercontent.com/Sliverkiss/49a9ffb2169a2becc33bf4fdbf6eb99a/raw/wmbwc.js, requires-body=true, timeout=60, tag=歪麦霸王餐Cookie,enable={Waimai_Cookie}
+cron {Waimai_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/gist.githubusercontent.com/Sliverkiss/49a9ffb2169a2becc33bf4fdbf6eb99a/raw/wmbwc.js,tag=歪麦霸王餐签到,enable={Waimai_DailyBonus}
 
 # 微信支付有优惠
-http-response https:\/\/payapp\.weixin\.qq\.com\/(coupon-center-user\/home\/login|coupon-center-award\/award\/detail) script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/raw.githubusercontent.com/FoKit/Scripts/main/scripts/wechat_pay_coupon.js,requires-body=1,tag=支付有优惠Cookie,enable={WechatPay_Cookie}
-cron {WechatPay_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/Juzii/main/deps/raw.githubusercontent.com/FoKit/Scripts/main/scripts/wechat_pay_coupon.js,tag=支付有优惠金币获取,enable={WechatPay_DailyBonus}
+http-response https:\/\/payapp\.weixin\.qq\.com\/(coupon-center-user\/home\/login|coupon-center-award\/award\/detail) script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/raw.githubusercontent.com/FoKit/Scripts/main/scripts/wechat_pay_coupon.js,requires-body=1,tag=支付有优惠Cookie,enable={WechatPay_Cookie}
+cron {WechatPay_CRONEXP} script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/raw.githubusercontent.com/FoKit/Scripts/main/scripts/wechat_pay_coupon.js,tag=支付有优惠金币获取,enable={WechatPay_DailyBonus}
 
 [MITM]
 hostname=app.bilibili.com, mxsa.mxbc.net, payapp.weixin.qq.com, increase-openapi.soulapp.cn, maicai.api.ddxq.mobi, wmapp-api.waimaimingtang.com, gw.xiaocantech.com, xxyx-client-api.xiaoxiaoyouxuan.com
