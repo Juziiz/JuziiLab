@@ -11,7 +11,7 @@ BK="/root/nginx-gate.bak-fix10-$TS"; mkdir -p "$BK"
 for f in nginx.conf nginx-main.conf; do [ -f "$f" ] && cp -a "$f" "$BK/"; done
 export XIAOCAN_APP_DIR="$APP_DIR"
 if ! python3 - <<'PYEOF_FIX10'
-import os, sys
+import os, re, sys
 
 CSS = (
 "@media (max-width:860px){"
@@ -36,13 +36,22 @@ CSS = (
 ".semi-descriptions-key,.semi-descriptions-value{white-space:normal!important}"
 ".semi-page{flex-wrap:wrap;row-gap:6px}"
 ".semi-card-body{padding:12px!important}"
-".semi-layout-header{height:auto!important}"
-".semi-list-item{flex-wrap:wrap}"
+".semi-card-header{flex-wrap:wrap!important;row-gap:6px}"
+".semi-list-item{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}"
+".semi-navigation-item{min-height:44px}"
+".semi-layout-header{flex-wrap:wrap!important;height:auto!important;min-height:52px;padding:6px 10px!important;row-gap:6px}"
+".semi-layout-header .semi-space{justify-content:flex-end;flex:1 1 auto;min-width:0}"
+".semi-space{flex-wrap:wrap!important;row-gap:6px}"
+"#header-location-btn span{max-width:92px!important}"
+"[class*=justify-between]{flex-wrap:wrap!important}"
+"[class*=text-xs]{font-size:13px!important}"
+"[class*=text-[11px]]{font-size:12px!important}"
+"[class*=text-[10px]]{font-size:11px!important}"
 "}"
 )
 
 DIRECTIVES = (
-    "\n        # [fix10] mobile css injection (narrow screens only)\n"
+    "\n        # [fix10] mobile css injection v2 (narrow screens only)\n"
     "        proxy_set_header Accept-Encoding \"\";\n"
     "        sub_filter_once on;\n"
     "        sub_filter '</head>' '<style id=\"xc-mobile\">" + CSS + "</style></head>';\n"
@@ -77,27 +86,39 @@ def find_location_blocks(text):
     return blocks
 
 app_dir = os.environ.get("XIAOCAN_APP_DIR", "/opt/xiaocan-assistant")
-patched = False
+done = False
 for name in ("nginx.conf", "nginx-main.conf"):
     p = os.path.join(app_dir, name)
     if not os.path.exists(p):
         continue
     text = open(p, encoding="utf-8").read()
+    if "injection v2" in text:
+        print("[fix10] already v2 in " + name + ", skip")
+        done = True
+        break
     if "xc-mobile" in text:
-        print("[fix10] already injected in " + name + ", skip")
-        patched = True
-        continue
+        # upgrade v1 CSS in place
+        new = re.sub(r'(<style id="xc-mobile">).*?(</style>)',
+                     lambda mo: mo.group(1) + CSS + mo.group(2), text, count=1, flags=re.S)
+        new = new.replace("mobile css injection (narrow screens only)", "mobile css injection v2 (narrow screens only)")
+        if new != text and "injection v2" in new:
+            open(p, "w", encoding="utf-8").write(new)
+            print("[fix10] upgraded mobile CSS to v2 in " + name)
+            done = True
+            break
+        print("[fix10] ERROR: v1 found but upgrade failed in " + name)
+        sys.exit(1)
     for (j, k, m) in find_location_blocks(text):
         block = text[k:m]
         if "proxy_pass" in block and "8690" in block:
             text = text[:m] + DIRECTIVES + text[m:]
             open(p, "w", encoding="utf-8").write(text)
-            print("[fix10] injected mobile CSS into " + name)
-            patched = True
+            print("[fix10] injected mobile CSS v2 into " + name)
+            done = True
             break
-    if patched:
+    if done:
         break
-if not patched:
+if not done:
     print("[fix10] ERROR: no location block proxying to 8690 found in gate configs")
     sys.exit(1)
 PYEOF_FIX10
