@@ -22,8 +22,12 @@ CSS = (
 ".semi-modal-header{padding:12px 16px!important}"
 ".semi-modal-footer{padding:10px 16px!important}"
 "body .semi-table-container{overflow-x:auto!important;-webkit-overflow-scrolling:touch}"
-"body .semi-table-container table{min-width:0!important}"
-".semi-table-row-cell{white-space:normal;word-break:break-word}"
+"body .semi-table-container table{min-width:620px}"
+".semi-table-row-cell{white-space:nowrap}"
+".logs-table-container .semi-table-row-cell{white-space:normal!important;word-break:break-word}"
+".logs-table-container .semi-table-row{height:auto!important}"
+".logs-table-container .semi-table-row-cell{overflow:hidden;vertical-align:top}"
+".logs-table-container .semi-table-row-cell-render-content{width:auto!important;max-width:100%!important}"
 ".logs-table-container .semi-table-container table{table-layout:fixed!important;width:100%!important}"
 ".logs-table-container col:nth-child(1){width:8%!important}"
 ".logs-table-container col:nth-child(2){width:24%!important}"
@@ -62,13 +66,14 @@ CSS = (
 "[class*=lg:col-span-7],[class*=lg:col-span-5]{height:auto!important;overflow:visible!important}"
 "[class*=lg:col-span-7] [class*=overflow-y-auto]{max-height:38dvh!important}"
 "[class*=lg:col-span-5] .semi-card{flex:none!important;overflow:visible!important}"
-"[class*=lg:col-span-5] .semi-card-body{overflow:visible!important}"
+"[class*=lg:col-span-5] .semi-card-body{overflow:visible!important;flex:none!important}"
+"[class*=lg:col-span-5] .semi-card-body [class*=flex-1]{flex:none!important;height:auto!important}"
 "[class*=lg:col-span-5] [class*=overflow-hidden],[class*=lg:col-span-5] [class*=overflow-y-auto]{overflow:visible!important;max-height:none!important}"
 "}"
 )
 
 DIRECTIVES = (
-    "\n        # [fix10] mobile css injection v3 (narrow screens only)\n"
+    "\n        # [fix10] mobile css injection v4 (narrow screens only)\n"
     "        proxy_set_header Accept-Encoding \"\";\n"
     "        sub_filter_once on;\n"
     "        sub_filter '</head>' '<style id=\"xc-mobile\">" + CSS + "</style></head>';\n"
@@ -109,18 +114,18 @@ for name in ("nginx.conf", "nginx-main.conf"):
     if not os.path.exists(p):
         continue
     text = open(p, encoding="utf-8").read()
-    if "injection v3" in text:
-        print("[fix10] already v3 in " + name + ", skip")
+    if "injection v4" in text:
+        print("[fix10] already v4 in " + name + ", skip")
         done = True
         break
     if "xc-mobile" in text:
         new = re.sub(r'(<style id="xc-mobile">).*?(</style>)',
                      lambda mo: mo.group(1) + CSS + mo.group(2), text, count=1, flags=re.S)
         new = re.sub(r"mobile css injection( v\d+)? \(narrow screens only\)",
-                     "mobile css injection v3 (narrow screens only)", new)
-        if new != text and "injection v3" in new:
+                     "mobile css injection v4 (narrow screens only)", new)
+        if new != text and "injection v4" in new:
             open(p, "w", encoding="utf-8").write(new)
-            print("[fix10] upgraded mobile CSS to v3 in " + name)
+            print("[fix10] upgraded mobile CSS to v4 in " + name)
             done = True
             break
         print("[fix10] ERROR: old version found but upgrade failed in " + name)
@@ -130,7 +135,7 @@ for name in ("nginx.conf", "nginx-main.conf"):
         if "proxy_pass" in block and "8690" in block:
             text = text[:m] + DIRECTIVES + text[m:]
             open(p, "w", encoding="utf-8").write(text)
-            print("[fix10] injected mobile CSS v3 into " + name)
+            print("[fix10] injected mobile CSS v4 into " + name)
             done = True
             break
     if done:
