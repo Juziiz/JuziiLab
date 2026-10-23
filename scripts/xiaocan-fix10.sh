@@ -23,21 +23,7 @@ RULES = [
 "body .semi-table-container{overflow-x:auto!important;-webkit-overflow-scrolling:touch}",
 "body .semi-table-container table{min-width:620px}",
 ".semi-table-row-cell{white-space:nowrap}",
-".logs-table-container .semi-table-row-cell{white-space:normal!important;word-break:break-word}",
-".logs-table-container .semi-table-row{height:auto!important}",
-".logs-table-container .semi-table-row-cell{overflow:hidden;vertical-align:top}",
-".logs-table-container .semi-table-row-cell-render-content{width:auto!important;max-width:100%!important}",
-".logs-table-container .semi-table-container table{table-layout:fixed!important;width:100%!important;min-width:0!important}",
-".logs-table-container col:nth-child(1){width:8%!important}",
-".logs-table-container col:nth-child(2){width:23%!important}",
-".logs-table-container col:nth-child(3){width:15%!important}",
-".logs-table-container col:nth-child(4){width:26%!important}",
-".logs-table-container col:nth-child(5){width:12%!important}",
-".logs-table-container col:nth-child(6){display:none!important}",
-".logs-table-container col:nth-child(7){width:16%!important}",
-".logs-table-container .semi-table-thead tr>th:nth-child(6),.logs-table-container .semi-table-tbody tr>td:nth-child(6){display:none!important}",
 ".logs-table-container .semi-table-row-cell,.logs-table-container .semi-table-row-head{padding-left:5px!important;padding-right:5px!important;font-size:12.5px}",
-".logs-table-container .semi-table-tbody td:nth-child(2) *{white-space:normal!important}",
 ".semi-row>[class*=\"semi-col-\"]{flex:0 0 100%!important;max-width:100%!important}",
 "input,textarea,.semi-input,.semi-textarea{font-size:16px!important}",
 ".semi-select-selection{font-size:16px!important}",
@@ -79,7 +65,7 @@ JS = (
 )
 
 DIRECTIVES = (
-    "\n        # [fix10] mobile injection v7 (narrow screens only)\n"
+    "\n        # [fix10] mobile injection v8 (narrow screens only)\n"
     "        proxy_set_header Accept-Encoding \"\";\n"
     "        set $xc_css_a '" + CSS_A + "';\n"
     "        set $xc_css_b '" + CSS_B + "';\n"
@@ -122,16 +108,16 @@ for name in ("nginx.conf", "nginx-main.conf"):
     if not os.path.exists(p):
         continue
     text = open(p, encoding="utf-8").read()
-    if "injection v7" in text:
-        print("[fix10] already v7 in " + name + ", skip")
+    if "injection v8" in text:
+        print("[fix10] already v8 in " + name + ", skip")
         done = True
         break
     if "xc-mobile" in text:
-        new = re.sub(r"# \[fix10\] mobile css injection.*?sub_filter '</head>'.*?</style></head>';",
+        new = re.sub(r"# \[fix10\] mobile[^\n]*\n(?:        [^\n]*\n)*?        sub_filter [^\n]*\n",
                      lambda mo: DIRECTIVES.strip(), text, count=1, flags=re.S)
-        if new != text and "injection v7" in new:
+        if new != text and "injection v8" in new:
             open(p, "w", encoding="utf-8").write(new)
-            print("[fix10] upgraded mobile injection to v7 in " + name)
+            print("[fix10] upgraded mobile injection to v8 in " + name)
             done = True
             break
         print("[fix10] ERROR: old version found but upgrade failed in " + name)
@@ -141,7 +127,7 @@ for name in ("nginx.conf", "nginx-main.conf"):
         if "proxy_pass" in block and "8690" in block:
             text = text[:m] + DIRECTIVES + text[m:]
             open(p, "w", encoding="utf-8").write(text)
-            print("[fix10] injected mobile v7 into " + name)
+            print("[fix10] injected mobile v8 into " + name)
             done = True
             break
     if done:
