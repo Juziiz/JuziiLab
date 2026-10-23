@@ -327,6 +327,20 @@ src2 = "\n".join(lines)
 _old_parse = 'target_id = int(goods_ids.split(",")[0].strip())'
 if _old_parse in src2:
     src2 = src2.replace(_old_parse, 'target_id = int("".join(ch for ch in goods_ids.split(",")[0] if ch.isdigit()) or -1)', 1)
+if "_lst = fs_res.get(" not in src2:
+    _lines2 = src2.split("\n")
+    for _i2, _ln2 in enumerate(_lines2):
+        if '.get("vip")' in _ln2 and "items" in _ln2:
+            _ind2 = _ln2[:len(_ln2) - len(_ln2.lstrip())]
+            _lines2[_i2:_i2+1] = [
+                _ind2 + '_lst = fs_res.get("list") or {}',
+                _ind2 + "items = []",
+                _ind2 + "for _grp in _lst.values():",
+                _ind2 + "    if isinstance(_grp, list):",
+                _ind2 + "        items.extend(_grp)",
+            ]
+            src2 = "\n".join(_lines2)
+            break
 open(path, "w", encoding="utf-8").write(src2)
 PYEOF_FIX5
   then
@@ -380,9 +394,13 @@ async def _fs_goods_options(account_key):
             res = await client.list_flash_sale_exchanges(
                 token=acc["token"], silk_id=acc.get("silk_id"), user_id=acc.get("user_id"),
                 city_code=acc.get("city_code") or 440303, is_plus=bool(acc.get("is_plus", 0)))
-            items = (res.get("list") or {}).get("vip") or []
+            _lst = res.get("list") or {}
+            items = []
+            for _grp in _lst.values():
+                if isinstance(_grp, list):
+                    items.extend(_grp)
             options = [{"label": "自动优选 - 抢第一款有库存的", "value": ""}]
-            for it in items[:15]:
+            for it in items[:20]:
                 options.append({
                     "label": f"{it.get('goods_name') or '未命名商品'} - {it.get('community_silk', 0)}元宝 - 剩{it.get('left', 0)}",
                     "value": str(it.get("exchange_id")),
