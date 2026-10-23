@@ -15,6 +15,7 @@ def find_target(res):
     return None, None
 
 async def main():
+    print("PROBE-V2 (silk via user_info)")
     accs = [a for a in db.get_all_accounts() if a.get("token")]
     acc = next((a for a in accs if str(a.get("silk_id")) == "527711911"), accs[0] if accs else None)
     if not acc:
