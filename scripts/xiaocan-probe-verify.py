@@ -26,8 +26,8 @@ async def main():
     client = XiaoCanClient()
 
     info1 = await client.get_user_info(**kw)
-    ui1 = info1.get("info") or info1
-    print("silk BEFORE:", ui1.get("silk"), "| info keys:", list(ui1.keys())[:15])
+    ui1 = info1.get("user_info") or {}
+    print("silk BEFORE:", ui1.get("silk"))
 
     fs1 = await client.list_flash_sale_exchanges(is_plus=bool(acc.get("is_plus", 0)), **kw)
     g, it = find_target(fs1)
@@ -40,7 +40,7 @@ async def main():
         print(f"exchange RPCError: code={e.code} msg={e.msg}")
 
     info2 = await client.get_user_info(**kw)
-    ui2 = info2.get("info") or info2
+    ui2 = info2.get("user_info") or {}
     print("silk AFTER:", ui2.get("silk"))
 
     fs2 = await client.list_flash_sale_exchanges(is_plus=bool(acc.get("is_plus", 0)), **kw)
