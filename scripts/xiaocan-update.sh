@@ -342,14 +342,14 @@ if "_lst = fs_res.get(" not in src2:
             src2 = "\n".join(_lines2)
             break
 
-# ---------- 5. scheduler.py：fix8 兑换成功改为余额扣款核验 ----------
+# ---------- 5. scheduler.py：fix9 兑换成功改为元宝(yb_point)扣款核验 ----------
 import re as _re8
-if "[fix8]" in src2:
-    print("[update] scheduler fix8 核验已在，跳过")
+if "[fix9]" in src2:
+    print("[update] scheduler fix9 核验已在，跳过")
 else:
     _m8 = _re8.search(r"client\.today_exchange\(exchange_id=eid,\s*(token=[^,]+),", src2)
     if not _m8:
-        print("[update] WARN: 未找到 today_exchange，fix8 跳过")
+        print("[update] WARN: 未找到 today_exchange，fix9 跳过")
     else:
         _tok8 = _m8.group(1)
         _lines8 = src2.split("\n")
@@ -359,14 +359,14 @@ else:
         _i_end8 = next(i for i in range(_i_ex8, len(_lines8)) if "level=NotificationLevel.SUCCESS" in _lines8[i])
         _i_close8 = _i_end8 + 1
         if _idx_t8 is None or _lines8[_i_try8].strip() != "try:" or _lines8[_i_close8].strip() != ")":
-            print("[update] WARN: fix8 锚点不符，跳过")
+            print("[update] WARN: fix9 锚点不符，跳过")
         else:
             _ind16 = " " * 16
             _before8 = [
                 _ind16 + "_silk_before = None",
                 _ind16 + "try:",
-                _ind16 + "    _ui0 = await client.get_user_info(" + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
-                _ind16 + '    _silk_before = (_ui0.get("user_info") or {}).get("silk")',
+                _ind16 + "    _ui0 = await client.get_user_task_v2(" + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
+                _ind16 + '    _silk_before = (_ui0.get("data") or {}).get("yb_point")',
                 _ind16 + "except Exception:",
                 _ind16 + "    _silk_before = None",
             ]
@@ -377,14 +377,14 @@ else:
             _new8 = [
                 _i20 + "try:",
                 _i24 + "ex_res = await client.today_exchange(exchange_id=eid, " + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
-                _i24 + "# [fix8] no-error != success: only an actual silk deduction counts",
+                _i24 + "# [fix9] no-error != success: only an actual silk deduction counts",
                 _i24 + "_verified = False",
                 _i24 + "_silk_after = None",
                 _i24 + "for _vt in range(3):",
                 _i28 + "await asyncio.sleep(1.0)",
                 _i28 + "try:",
-                _i28 + "    _ui2 = await client.get_user_info(" + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
-                _i28 + '    _silk_after = (_ui2.get("user_info") or {}).get("silk")',
+                _i28 + "    _ui2 = await client.get_user_task_v2(" + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
+                _i28 + '    _silk_after = (_ui2.get("data") or {}).get("yb_point")',
                 _i28 + "except Exception:",
                 _i28 + "    _silk_after = None",
                 _i28 + "if _silk_before is not None and _silk_after is not None and (_silk_before - _silk_after) >= max(int(esilk or 0), 1):",
@@ -406,7 +406,7 @@ else:
             _lines8[_i_try8:_i_close8 + 1] = _new8
             src2 = "\n".join(_lines8)
             pass
-            print("[update] scheduler fix8 余额核验已写入")
+            print("[update] scheduler fix9 余额核验已写入")
 
 open(path, "w", encoding="utf-8").write(src2)
 PYEOF_FIX5
