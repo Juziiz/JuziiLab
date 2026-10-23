@@ -24,6 +24,10 @@
 # 若上游改了结构导致打不上，只提醒、不影响更新结果。仅由这两处补丁
 # 造成的本地差异不算上游更新，不会误报新版。
 #
+# fix6 补丁（endpoints.py 含 _fs_goods_options 字样：元宝秒杀商品下拉选择，
+# 附带 scheduler.py 的 ID 解析加固）同理：升级后自动重打、再构建验活；
+# 打不上只提醒。由它造成的 endpoints.py 本地差异同样不算上游更新。
+#
 # 用法：
 #   bash xiaocan-update.sh            正常更新（无新版会自己退出）
 #   bash xiaocan-update.sh --check    只检查有没有新版，不动服务
@@ -42,6 +46,8 @@ PATCH_REL="backend/app/core/jwt_utils.py"
 PATCH_MARK="_join_wrapped_header_lines"
 FIX5_REL="backend/app/core/scheduler.py"
 FIX5_MARK="秒杀商品 ID="
+FIX6_REL="backend/app/api/endpoints.py"
+FIX6_MARK="_fs_goods_options"
 REPO_ZIP="https://codeload.github.com/AkiSeele/xiaocan-assistant/zip/refs/heads/main"
 REPO_API="https://api.github.com/repos/AkiSeele/xiaocan-assistant/commits/main"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -92,6 +98,10 @@ FIX5_LOCAL=0
 grep -q "$FIX5_MARK" "$APP_DIR/$FIX5_REL" 2>/dev/null && FIX5_LOCAL=1
 FIX5_UPSTREAM=0
 grep -q "$FIX5_MARK" "$NEW_SRC/$FIX5_REL" 2>/dev/null && FIX5_UPSTREAM=1
+FIX6_LOCAL=0
+grep -q "$FIX6_MARK" "$APP_DIR/$FIX6_REL" 2>/dev/null && FIX6_LOCAL=1
+FIX6_UPSTREAM=0
+grep -q "$FIX6_MARK" "$NEW_SRC/$FIX6_REL" 2>/dev/null && FIX6_UPSTREAM=1
 
 DIFF_OUT="$WORK/diff.txt"
 diff -rq \
@@ -106,6 +116,10 @@ if [ "$PATCH_LOCAL" = "1" ] && [ "$PATCH_UPSTREAM" = "0" ]; then
 fi
 if [ "$FIX5_LOCAL" = "1" ] && [ "$FIX5_UPSTREAM" = "0" ]; then
   grep -v "scheduler\.py" "$DIFF_OUT" > "$WORK/diff2.txt" || true
+  mv "$WORK/diff2.txt" "$DIFF_OUT"
+fi
+if [ "$FIX6_LOCAL" = "1" ] && [ "$FIX6_UPSTREAM" = "0" ]; then
+  grep -v "endpoints\.py" "$DIFF_OUT" > "$WORK/diff2.txt" || true
   mv "$WORK/diff2.txt" "$DIFF_OUT"
 fi
 
@@ -309,7 +323,11 @@ insert = [
     indent + "    log_output += f\"[{time.strftime('%H:%M:%S')}] 秒杀商品 ID={_fs_item.get('exchange_id')} 名称={_fs_item.get('goods_name') or '未命名'} 元宝={_fs_item.get('community_silk', 0)} 剩余={_fs_item.get('left', 0)}\\n\"",
 ]
 lines[idx+1:idx+1] = insert
-open(path, "w", encoding="utf-8").write("\n".join(lines))
+src2 = "\n".join(lines)
+_old_parse = 'target_id = int(goods_ids.split(",")[0].strip())'
+if _old_parse in src2:
+    src2 = src2.replace(_old_parse, 'target_id = int("".join(ch for ch in goods_ids.split(",")[0] if ch.isdigit()) or -1)', 1)
+open(path, "w", encoding="utf-8").write(src2)
 PYEOF_FIX5
   then
     if grep -q "$FIX5_MARK" "$APP_DIR/$FIX5_REL" && python3 -m py_compile "$APP_DIR/$FIX5_REL"; then
@@ -329,6 +347,86 @@ PYEOF_FIX5
     fi
   else
     say "WARN: fix5 补丁未能自动重打（上游结构可能变了），已跳过（不影响新版使用），请找助手手动处理"
+  fi
+fi
+
+# ---------- 7.6 自动重打 fix6 补丁（元宝秒杀商品下拉选择） ----------
+if [ "$FIX6_LOCAL" = "1" ] && [ "$FIX6_UPSTREAM" = "0" ]; then
+  say "检测到旧版有 fix6 补丁，正在给新版自动重打…"
+  export XIAOCAN_FIX6_TARGET="$APP_DIR/$FIX6_REL"
+  if python3 - <<'PYEOF_FIX6'
+import os, sys
+path = os.environ["XIAOCAN_FIX6_TARGET"]
+src = open(path, encoding="utf-8").read()
+if "_fs_goods_options" in src:
+    sys.exit(0)
+anchor = 'client = XiaoCanClient()'
+if anchor not in src:
+    sys.exit(1)
+helper = anchor + '''
+
+# [fix6] 元宝秒杀商品下拉数据源：按账号缓存 10 分钟，避免频繁打官方接口
+_FS_GOODS_CACHE = {}
+
+async def _fs_goods_options(account_key):
+    now = time.time()
+    hit = _FS_GOODS_CACHE.get(account_key)
+    if hit and now - hit[0] < 600:
+        return hit[1]
+    options = None
+    try:
+        acc = db.get_account_by_key(account_key)
+        if acc and acc.get("token"):
+            res = await client.list_flash_sale_exchanges(
+                token=acc["token"], silk_id=acc.get("silk_id"), user_id=acc.get("user_id"),
+                city_code=acc.get("city_code") or 440303, is_plus=bool(acc.get("is_plus", 0)))
+            items = (res.get("list") or {}).get("vip") or []
+            options = [{"label": "自动优选 - 抢第一款有库存的", "value": ""}]
+            for it in items[:15]:
+                options.append({
+                    "label": f"{it.get('goods_name') or '未命名商品'} - {it.get('community_silk', 0)}元宝 - 剩{it.get('left', 0)}",
+                    "value": str(it.get("exchange_id")),
+                })
+    except Exception:
+        options = None
+    if options:
+        _FS_GOODS_CACHE[account_key] = (now, options)
+    return options
+'''
+src = src.replace(anchor, helper, 1)
+anchor2 = '        # 查询 APScheduler 中此任务的下一次真实触发时刻'
+if anchor2 not in src:
+    sys.exit(1)
+inject = '''        if tid == "flash_sale":
+            _fs_opts = await _fs_goods_options(account_key)
+            if _fs_opts:
+                _saved = str(merged_params.get("goods_ids") or "").strip()
+                if _saved and _saved not in [o["value"] for o in _fs_opts]:
+                    _fs_opts = _fs_opts + [{"label": f"已选商品 {_saved} - 当前不在架", "value": _saved}]
+                param_defs = [{"key": "goods_ids", "label": "秒杀商品", "def": "", "type": "select", "options": _fs_opts, "hint": "选好保存后，到点只抢这款；选自动优选则抢第一款有库存的"}]
+
+''' + anchor2
+src = src.replace(anchor2, inject, 1)
+open(path, "w", encoding="utf-8").write(src)
+PYEOF_FIX6
+  then
+    if grep -q "$FIX6_MARK" "$APP_DIR/$FIX6_REL" && python3 -m py_compile "$APP_DIR/$FIX6_REL"; then
+      say "fix6 补丁已重打，重新构建生效…"
+      $COMPOSE up -d --build || rollback
+      OK3=0
+      for i in $(seq 1 40); do
+        if curl -fsS http://127.0.0.1:8690/health >/dev/null 2>&1 || docker exec xiaocan-assistant python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8690/health')" >/dev/null 2>&1; then
+          OK3=1; break
+        fi
+        sleep 5
+      done
+      [ "$OK3" = "1" ] || { say "重打 fix6 后健康检查未通过"; rollback; }
+      say "fix6 补丁重打完成并通过健康检查"
+    else
+      say "WARN: fix6 补丁写入校验失败，已跳过（不影响新版使用），请找助手手动处理"
+    fi
+  else
+    say "WARN: fix6 补丁未能自动重打（上游结构可能变了），已跳过（不影响新版使用），请找助手手动处理"
   fi
 fi
 
