@@ -21,9 +21,19 @@ CSS = (
 ".semi-modal-body{overflow-y:auto!important}"
 ".semi-modal-header{padding:12px 16px!important}"
 ".semi-modal-footer{padding:10px 16px!important}"
-".semi-table-container{overflow-x:auto!important;-webkit-overflow-scrolling:touch}"
-".semi-table-container table{min-width:620px}"
-".semi-table-row-cell{white-space:nowrap}"
+"body .semi-table-container{overflow-x:auto!important;-webkit-overflow-scrolling:touch}"
+"body .semi-table-container table{min-width:0!important}"
+".semi-table-row-cell{white-space:normal;word-break:break-word}"
+".logs-table-container .semi-table-container table{table-layout:fixed!important;width:100%!important}"
+".logs-table-container col:nth-child(1){width:8%!important}"
+".logs-table-container col:nth-child(2){width:24%!important}"
+".logs-table-container col:nth-child(3){width:15%!important}"
+".logs-table-container col:nth-child(4){width:25%!important}"
+".logs-table-container col:nth-child(5){width:12%!important}"
+".logs-table-container col:nth-child(6){display:none!important}"
+".logs-table-container col:nth-child(7){width:16%!important}"
+".logs-table-container .semi-table-thead tr>th:nth-child(6),.logs-table-container .semi-table-tbody tr>td:nth-child(6){display:none!important}"
+".logs-table-container .semi-table-row-cell,.logs-table-container .semi-table-row-head{padding-left:5px!important;padding-right:5px!important;font-size:12.5px}"
 ".semi-row>[class*=semi-col-]{flex:0 0 100%!important;max-width:100%!important}"
 "input,textarea,.semi-input,.semi-textarea{font-size:16px!important}"
 ".semi-select-selection{font-size:16px!important}"
@@ -47,11 +57,18 @@ CSS = (
 "[class*=text-xs]{font-size:13px!important}"
 "[class*=text-[11px]]{font-size:12px!important}"
 "[class*=text-[10px]]{font-size:11px!important}"
+"[class*=justify-between][class*=overflow-hidden]:has(>[class*=lg:grid-cols-12]){overflow-y:auto!important;justify-content:flex-start!important}"
+"[class*=lg:grid-cols-12]{overflow:visible!important;flex:none!important;height:auto!important}"
+"[class*=lg:col-span-7],[class*=lg:col-span-5]{height:auto!important;overflow:visible!important}"
+"[class*=lg:col-span-7] [class*=overflow-y-auto]{max-height:38dvh!important}"
+"[class*=lg:col-span-5] .semi-card{flex:none!important;overflow:visible!important}"
+"[class*=lg:col-span-5] .semi-card-body{overflow:visible!important}"
+"[class*=lg:col-span-5] [class*=overflow-hidden],[class*=lg:col-span-5] [class*=overflow-y-auto]{overflow:visible!important;max-height:none!important}"
 "}"
 )
 
 DIRECTIVES = (
-    "\n        # [fix10] mobile css injection v2 (narrow screens only)\n"
+    "\n        # [fix10] mobile css injection v3 (narrow screens only)\n"
     "        proxy_set_header Accept-Encoding \"\";\n"
     "        sub_filter_once on;\n"
     "        sub_filter '</head>' '<style id=\"xc-mobile\">" + CSS + "</style></head>';\n"
@@ -92,28 +109,28 @@ for name in ("nginx.conf", "nginx-main.conf"):
     if not os.path.exists(p):
         continue
     text = open(p, encoding="utf-8").read()
-    if "injection v2" in text:
-        print("[fix10] already v2 in " + name + ", skip")
+    if "injection v3" in text:
+        print("[fix10] already v3 in " + name + ", skip")
         done = True
         break
     if "xc-mobile" in text:
-        # upgrade v1 CSS in place
         new = re.sub(r'(<style id="xc-mobile">).*?(</style>)',
                      lambda mo: mo.group(1) + CSS + mo.group(2), text, count=1, flags=re.S)
-        new = new.replace("mobile css injection (narrow screens only)", "mobile css injection v2 (narrow screens only)")
-        if new != text and "injection v2" in new:
+        new = re.sub(r"mobile css injection( v\d+)? \(narrow screens only\)",
+                     "mobile css injection v3 (narrow screens only)", new)
+        if new != text and "injection v3" in new:
             open(p, "w", encoding="utf-8").write(new)
-            print("[fix10] upgraded mobile CSS to v2 in " + name)
+            print("[fix10] upgraded mobile CSS to v3 in " + name)
             done = True
             break
-        print("[fix10] ERROR: v1 found but upgrade failed in " + name)
+        print("[fix10] ERROR: old version found but upgrade failed in " + name)
         sys.exit(1)
     for (j, k, m) in find_location_blocks(text):
         block = text[k:m]
         if "proxy_pass" in block and "8690" in block:
             text = text[:m] + DIRECTIVES + text[m:]
             open(p, "w", encoding="utf-8").write(text)
-            print("[fix10] injected mobile CSS v2 into " + name)
+            print("[fix10] injected mobile CSS v3 into " + name)
             done = True
             break
     if done:
