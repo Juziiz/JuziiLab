@@ -238,6 +238,57 @@ if [ $? -ne 0 ]; then
 fi
 
 grep -q "_fs_goods_options" "$EP" || { cp -f "$EP_BAK" "$EP"; cp -f "$SC_BAK" "$SC"; die "写入后校验失败，已还原"; }
+# ---------- 6. scheduler.py：fix11 状态诚实化 ----------
+export XIAOCAN_SC="$SC"
+if ! python3 - <<'PYEOF_FIX11'
+import os, sys
+path = os.environ["XIAOCAN_SC"]
+src = open(path, encoding="utf-8").read()
+if "[fix11]" in src:
+    print("[fix11] already applied, skip")
+    sys.exit(0)
+lines = src.split("\n")
+out = []
+changed = 0
+for ln in lines:
+    out.append(ln)
+    # 1) flash_sale: 未抢到 -> status = "error"
+    if "判定未兑换成功" in ln and "log_output" in ln:
+        ind = ln[:len(ln) - len(ln.lstrip())]
+        out.append(ind + "status = \"error\"  # [fix11] 未抢到不算成功")
+        changed += 1
+    # 2) brand_flash: 初始化抢到标记（只认整点直射那处循环，上方有专属注释）
+    if ln.strip() == "for try_idx in range(1, 4):" and "_bf_grabbed" not in src:
+        prev = "\n".join(lines[max(0, len(out) - 4):len(out)])
+        owner = next((x for x in reversed(out) if "elif task_id ==" in x), "")
+        if "Zero-latency Burst" in prev and "brand_flash" in owner:
+            ind = ln[:len(ln) - len(ln.lstrip())]
+            out[-1] = ind + "_bf_grabbed = False  # [fix11]\n" + ln
+            changed += 1
+    # 3) brand_flash: 真正受理成功时打标记
+    if "抢券成功！已成功领取" in ln and "log_output" in ln:
+        ind = ln[:len(ln) - len(ln.lstrip())]
+        out.append(ind + "_bf_grabbed = True")
+        changed += 1
+    # 4) brand_flash: 循环结束仍未抢到 -> status = "error"
+    if ln.startswith("        elif task_id == \"yb_task\":"):
+        ind16 = " " * 16
+        out[-1] = (
+            ind16 + "if can_burst and not _bf_grabbed:\n"
+            + ind16 + "    status = \"error\"\n"
+            + ind16 + "    log_output += f\"[{time_service.format_now()}] [抢每日大牌券] 本场未抢到: 多次尝试均未成功\\n\"\n"
+            + ln
+        )
+        changed += 1
+if changed < 4:
+    print(f"[fix11] anchors incomplete: only {changed}/4 spots patched")
+    sys.exit(1)
+open(path, "w", encoding="utf-8").write("\n".join(out))
+print(f"[fix11] status honesty patched at {changed} spots")
+PYEOF_FIX11
+then
+  cp -f "$SC_BAK" "$SC"; die "fix11 状态补丁写入失败，已还原 scheduler.py"
+fi
 python3 -m py_compile "$EP" || { cp -f "$EP_BAK" "$EP"; cp -f "$SC_BAK" "$SC"; die "endpoints.py 语法检查失败，已还原"; }
 python3 -m py_compile "$SC" || { cp -f "$EP_BAK" "$EP"; cp -f "$SC_BAK" "$SC"; die "scheduler.py 语法检查失败，已还原"; }
 say "补丁写入并通过语法检查，开始重建容器"
