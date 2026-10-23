@@ -162,6 +162,73 @@ else:
             print("[fix6] scheduler 商品池已合并 vip+svip 分组")
             break
 
+
+# ---------- 5. scheduler.py：fix8 兑换成功改为余额扣款核验 ----------
+import re as _re8
+if "[fix8]" in src:
+    print("[fix6] scheduler fix8 核验已在，跳过")
+else:
+    _m8 = _re8.search(r"client\.today_exchange\(exchange_id=eid,\s*(token=[^,]+),", src)
+    if not _m8:
+        print("[fix6] WARN: 未找到 today_exchange，fix8 跳过")
+    else:
+        _tok8 = _m8.group(1)
+        _lines8 = src.split("\n")
+        _idx_t8 = next((i for i, ln in enumerate(_lines8) if ln.strip() == "target_item = None"), None)
+        _i_ex8 = next(i for i, ln in enumerate(_lines8) if "ex_res = await client.today_exchange" in ln)
+        _i_try8 = _i_ex8 - 1
+        _i_end8 = next(i for i in range(_i_ex8, len(_lines8)) if "level=NotificationLevel.SUCCESS" in _lines8[i])
+        _i_close8 = _i_end8 + 1
+        if _idx_t8 is None or _lines8[_i_try8].strip() != "try:" or _lines8[_i_close8].strip() != ")":
+            print("[fix6] WARN: fix8 锚点不符，跳过")
+        else:
+            _ind16 = " " * 16
+            _before8 = [
+                _ind16 + "_silk_before = None",
+                _ind16 + "try:",
+                _ind16 + "    _ui0 = await client.get_user_info(" + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
+                _ind16 + '    _silk_before = (_ui0.get("user_info") or {}).get("silk")',
+                _ind16 + "except Exception:",
+                _ind16 + "    _silk_before = None",
+            ]
+            _lines8[_idx_t8:_idx_t8] = _before8
+            _shift8 = len(_before8)
+            _i_try8 += _shift8; _i_close8 += _shift8; _i_ex8 += _shift8
+            _i20 = " " * 20; _i24 = " " * 24; _i28 = " " * 28
+            _new8 = [
+                _i20 + "try:",
+                _i24 + "ex_res = await client.today_exchange(exchange_id=eid, " + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
+                _i24 + "# [fix8] no-error != success: only an actual silk deduction counts",
+                _i24 + "_verified = False",
+                _i24 + "_silk_after = None",
+                _i24 + "for _vt in range(3):",
+                _i28 + "await asyncio.sleep(1.0)",
+                _i28 + "try:",
+                _i28 + "    _ui2 = await client.get_user_info(" + _tok8 + ", silk_id=silk_id, user_id=user_id, city_code=city_code)",
+                _i28 + '    _silk_after = (_ui2.get("user_info") or {}).get("silk")',
+                _i28 + "except Exception:",
+                _i28 + "    _silk_after = None",
+                _i28 + "if _silk_before is not None and _silk_after is not None and (_silk_before - _silk_after) >= max(int(esilk or 0), 1):",
+                _i28 + "    _verified = True",
+                _i28 + "    break",
+                _i24 + "_ts8 = datetime.now().strftime('%H:%M:%S.%f')[:-3]",
+                _i24 + "if _verified:",
+                _i28 + 'log_output += f"[{_ts8}] [自动抢元宝秒杀] 兑换成功！已斩获【{ename}】(元宝 {_silk_before} -> {_silk_after})\\n"',
+                _i28 + "await send_system_notification(",
+                _i28 + '    title="元宝秒杀抢券成功",',
+                _i28 + '    content=f"账号【{nickname}】成功兑换【{ename}】！",',
+                _i28 + "    account_key=account_key,",
+                _i28 + "    event=NotificationEvent.SPIKE_SUCCESS,",
+                _i28 + "    level=NotificationLevel.SUCCESS",
+                _i28 + ")",
+                _i24 + "else:",
+                _i28 + 'log_output += f"[{_ts8}] [自动抢元宝秒杀] 未抢到：接口已受理但元宝未扣款 (余额 {_silk_before} -> {_silk_after})，判定未兑换成功\\n"',
+            ]
+            _lines8[_i_try8:_i_close8 + 1] = _new8
+            src = "\n".join(_lines8)
+            changed = True
+            print("[fix6] scheduler fix8 余额核验已写入")
+
 if changed:
     open(sc_path, "w", encoding="utf-8").write(src)
 PYEOF_FIX6
