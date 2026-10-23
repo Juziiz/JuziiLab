@@ -73,9 +73,13 @@ async def _fs_goods_options(account_key):
             res = await client.list_flash_sale_exchanges(
                 token=acc["token"], silk_id=acc.get("silk_id"), user_id=acc.get("user_id"),
                 city_code=acc.get("city_code") or 440303, is_plus=bool(acc.get("is_plus", 0)))
-            items = (res.get("list") or {}).get("vip") or []
+            _lst = res.get("list") or {}
+            items = []
+            for _grp in _lst.values():
+                if isinstance(_grp, list):
+                    items.extend(_grp)
             options = [{"label": "自动优选 - 抢第一款有库存的", "value": ""}]
-            for it in items[:15]:
+            for it in items[:20]:
                 options.append({
                     "label": f"{it.get('goods_name') or '未命名商品'} - {it.get('community_silk', 0)}元宝 - 剩{it.get('left', 0)}",
                     "value": str(it.get("exchange_id")),
@@ -137,6 +141,26 @@ if old_parse in src:
     print("[fix6] scheduler ID 解析已加固")
 else:
     print("[fix6] scheduler ID 解析已是加固版或结构不同，跳过")
+
+# ---------- 4. scheduler.py：商品池合并 vip+svip 分组 ----------
+if "_lst = fs_res.get(" in src:
+    print("[fix6] scheduler 商品池已是合并版，跳过")
+else:
+    _lines = src.split("\n")
+    for _i, _ln in enumerate(_lines):
+        if '.get("vip")' in _ln and "items" in _ln:
+            _ind = _ln[:len(_ln) - len(_ln.lstrip())]
+            _lines[_i:_i+1] = [
+                _ind + '_lst = fs_res.get("list") or {}',
+                _ind + "items = []",
+                _ind + "for _grp in _lst.values():",
+                _ind + "    if isinstance(_grp, list):",
+                _ind + "        items.extend(_grp)",
+            ]
+            src = "\n".join(_lines)
+            changed = True
+            print("[fix6] scheduler 商品池已合并 vip+svip 分组")
+            break
 
 if changed:
     open(sc_path, "w", encoding="utf-8").write(src)
