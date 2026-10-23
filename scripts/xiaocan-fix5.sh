@@ -11,7 +11,8 @@
 # 用法（华为云运维终端，一行粘贴）：
 #   curl -fsSL https://raw.githubusercontent.com/Juziiz/JuziiLab/main/scripts/xiaocan-fix5.sh | bash
 #
-# 注意：以后跑 xiaocan-update.sh 升级上游新版时会覆盖本补丁，需要重打。
+# 注意：xiaocan-update.sh 已支持升级后自动重打本补丁（检测到旧版有
+# 补丁才会打）；手动换源码则需重跑本脚本。
 set -u
 
 APP_DIR=/opt/xiaocan-assistant
