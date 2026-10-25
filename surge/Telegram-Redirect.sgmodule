@@ -1,0 +1,16 @@
+#!name=Telegram 跳转
+#!desc=将 电报 重定向到你选择的 Telegram 客户端
+#!author=panda𝕏
+#!icon=https://iili.io/KQX347S.png
+#!arguments=CLIENT:"Telegram"
+#!arguments-desc=CLIENT：选择要跳转到的 Telegram 客户端\nTelegram：官方客户端，不重定向，直接放行\nNagram、Swiftgram、Turrit、iMe、Nicegram、Lingogram、Regram：跳转到对应客户端
+
+# 注意：原版脚本是 Egern 专用的（ctx.env / ctx.respond），在 Surge 上跑不了。
+# 这个模块配的是按 Surge API 重写的 TgRedirect-surge.js，跳转逻辑和原版一致，
+# 脚本已托管在 Juziiz/JuziiLab 的 surge/ 目录下。
+
+[Script]
+Telegram 链接重定向 = type=http-request,pattern=^https?:\/\/(t\.me|telegram\.me)\/.+,script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/surge/TgRedirect-surge.js,timeout=10,argument=CLIENT="{{{CLIENT}}}"
+
+[MITM]
+hostname = %APPEND% t.me, telegram.me
