@@ -6,15 +6,101 @@ icon: https://resource.wuyra.com/Icon/Tool_icon/120px/ManagerTools.png
 
 compat_arguments:
   PROXY: PROXY
+  enable_random_icon: 启用
+  replace_original_icon: 禁用
+  icon_library: Doraemon(100P)
+  Notify: 开启通知
+  node_cache_validity: 1分钟
+  response_cache_validity: 1分钟
 
 compat_arguments_schema:
   PROXY:
     name: PROXY
     description: 规则里走代理的策略组名，默认 PROXY；请改成你 Egern 配置里实际的代理策略组名。
     default_value: PROXY
+  enable_random_icon:
+    name: 启用插件随机图标
+    description: 对应 Loon 版“启用插件随机图标”。
+    default_value: 启用
+    options:
+      - 启用
+      - 禁用
+  replace_original_icon:
+    name: 替换原始插件图标
+    description: 对应 Loon 版“替换原始插件图标”。
+    default_value: 禁用
+    options:
+      - 启用
+      - 禁用
+  icon_library:
+    name: 插件随机图标合集
+    description: 对应 Loon 版“插件随机图标合集”。
+    default_value: Doraemon(100P)
+    options:
+      - Doraemon(100P)
+      - Shin-chan(100P)
+      - Weslie-Wolffy(100P)
+      - Tom-Jerry(100P)
+      - Genshin(160P)
+      - Shin-Miya(100P)
+      - OnePiece(100P)
+      - Stitch(100P)
+      - Pokemon(112P)
+      - PokemonGif(56P)
+      - Digimon(56P)
+      - Transformers(48P)
+      - Maruko-chan(100P)
+      - AttackOnTitan(84P)
+      - Naruto(284P)
+  Notify:
+    name: ScriptHub通知
+    description: 对应 Loon 版“ScriptHub通知”，经 $argument 传给重写转换与规则集转换脚本。
+    default_value: 开启通知
+    options:
+      - 开启通知
+      - 关闭通知
+      - 跟随链接
+  node_cache_validity:
+    name: 节点缓存有效期
+    description: 对应 Loon 版“节点缓存有效期”。
+    default_value: 1分钟
+    options:
+      - 1分钟
+      - 5分钟
+      - 10分钟
+      - 30分钟
+      - 1小时
+      - 2小时
+      - 3小时
+      - 6小时
+      - 12小时
+      - 24小时
+      - 48小时
+      - 72小时
+      - 参数传入
+  response_cache_validity:
+    name: 响应头缓存有效期
+    description: 对应 Loon 版“响应头缓存有效期”。
+    default_value: 1分钟
+    options:
+      - 1分钟
+      - 5分钟
+      - 10分钟
+      - 30分钟
+      - 1小时
+      - 2小时
+      - 3小时
+      - 6小时
+      - 12小时
+      - 24小时
+      - 48小时
+      - 72小时
+      - 参数传入
 
 compat_arguments_desc: |
   PROXY：规则里走代理的策略组名，默认 PROXY。使用前请在模块设置里把它改成你 Egern 配置里实际的代理策略组名，对应 Loon 版说明里的“为［PROXY］项分配代理策略”。
+
+  启用插件随机图标 / 替换原始插件图标 / 插件随机图标合集 / ScriptHub通知 / 节点缓存有效期 / 响应头缓存有效期：对应 Loon 版 [Argument] 里的 6 个编辑项，已原样转成 Egern 模块设置页的选项。ScriptHub通知经 $argument 传给重写转换与规则集转换脚本；其余几项也经 $argument 一并传给重写转换脚本。
 
   说明：原 Loon 版 [General] 里的 force-http-engine-hosts 是 Loon/Surge 专属设置，Egern 模块里没有对应项，已省略。
 
@@ -40,11 +126,15 @@ scriptings:
       match: '^https?://script\.hub/file/_start_/.+type=(?:qx-rewrite|surge-module|loon-plugin|all-module)'
       script_url: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/Rewrite-Parser.js
       timeout: 300
+      arguments:
+        _compat.$argument: "Notify={{{Notify}}}&启用插件随机图标={{{enable_random_icon}}}&替换原始插件图标={{{replace_original_icon}}}&插件随机图标合集={{{icon_library}}}&节点缓存有效期={{{node_cache_validity}}}&响应头缓存有效期={{{response_cache_validity}}}"
   - http_request:
       name: Script Hub 规则集转换
       match: '^https?://script\.hub/file/_start_/.+type=rule-set'
       script_url: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/rule-parser.js
       timeout: 300
+      arguments:
+        _compat.$argument: "Notify={{{Notify}}}"
   - http_request:
       name: Script Hub 脚本转换
       match: '^https?://script\.hub/convert/'
