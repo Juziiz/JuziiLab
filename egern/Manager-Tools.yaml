@@ -1,0 +1,124 @@
+name: Manager Tools
+description: 重写及规则集转换，高级订阅管理工具和 Boxjs 管理工具合集。包含 Script Hub、Sub-Store 与 BoxJS。
+author: 小白脸, xream, keywos, ckyb
+homepage: https://github.com/Juziiz/JuziiLab
+icon: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/assets/icon-dark.png
+
+compat_arguments:
+  Notify: 开启通知
+  cronexp: 55 23 * * *
+  sync: Sub-Store Sync
+  sync_disabled: false
+  produce: Sub-Store Produce
+  produce_disabled: true
+  produce_cronexp: 50 */6 * * *
+  produce_sub: sub1,sub2
+  produce_col: col1,col2
+
+compat_arguments_desc: |
+  Notify：Script Hub 通知设置，可选 开启通知、关闭通知、跟随链接。
+
+  cronexp：Sub-Store 同步配置定时任务，默认为每天 23 点 55 分。定时任务指定时将订阅/文件上传到私有 Gist，在前端叫做“同步”或“同步配置”。
+
+  sync：自定义同步定时任务名，便于在脚本编辑器中选择。
+
+  sync_disabled：默认为 false（开启同步任务）；设为 true 可禁用同步任务。注意：在 Egern 里设为 # 不会禁用任务，必须用这个开关。
+
+  produce：自定义处理订阅的定时任务名，一般用于定时处理耗时较长的订阅，以更新缓存，这样拉取时能用到缓存，不至于总是超时。
+
+  produce_disabled：默认为 true（禁用处理订阅任务）；设为 false 可开启。
+
+  produce_cronexp：配置处理订阅的定时任务，默认为每 6 小时。
+
+  produce_sub：自定义需定时处理的单条订阅名，多个用 , 连接。
+
+  produce_col：自定义需定时处理的组合订阅名，多个用 , 连接。注意：是名称（name），不是显示名称（displayName）；如果名称需要编码，请编码后再用 , 连接。顺序：并发执行单条订阅，然后并发执行组合订阅。
+
+  说明：原 Surge 版的 timeout、ability、engine 参数在 Egern 版里不可自定义，Sub-Store 脚本超时已在文件中固定为 900 秒；原 Surge 版 [General] 里的 force-http-engine-hosts 是 Surge 专属设置，Egern 模块里没有对应项，已省略。
+
+compat_arguments_schema:
+  sync_disabled:
+    name: 禁用同步任务
+    description: false 为开启同步任务（默认），true 为禁用同步任务。
+    default_value: "false"
+    options:
+      - "false"
+      - "true"
+  produce_disabled:
+    name: 禁用处理订阅任务
+    description: true 为禁用处理订阅任务（默认），false 为开启。
+    default_value: "true"
+    options:
+      - "false"
+      - "true"
+
+scriptings:
+  - http_request:
+      name: Script Hub 前端
+      match: '^https?://script\.hub/($|edit/|reload)'
+      script_url: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/script-hub.js
+      timeout: 300
+  - http_request:
+      name: Script Hub 重写转换
+      match: '^https?://script\.hub/file/_start_/.+type=(?:qx-rewrite|surge-module|loon-plugin|all-module)'
+      script_url: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/Rewrite-Parser.js
+      timeout: 300
+      arguments:
+        _compat.$argument: "Notify={{{Notify}}}"
+  - http_request:
+      name: Script Hub 规则集转换
+      match: '^https?://script\.hub/file/_start_/.+type=rule-set'
+      script_url: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/rule-parser.js
+      timeout: 300
+      arguments:
+        _compat.$argument: "Notify={{{Notify}}}"
+  - http_request:
+      name: Script Hub 脚本转换
+      match: '^https?://script\.hub/convert/'
+      script_url: https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/script-converter.js
+      timeout: 300
+  - http_request:
+      name: Sub-Store Core
+      match: '^https?://sub\.store/((download)|api/(preview|sync|(utils/node-info)))'
+      script_url: https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-1.min.js
+      body_required: true
+      max_size: 999999999
+      timeout: 900
+  - http_request:
+      name: Sub-Store Simple
+      match: '^https?://sub\.store'
+      script_url: https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-0.min.js
+      body_required: true
+      max_size: 999999999
+      timeout: 900
+  - schedule:
+      name: "{{{sync}}}"
+      disabled: {{{sync_disabled}}}
+      cron: "{{{cronexp}}}"
+      script_url: https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/cron-sync-artifacts.min.js
+      timeout: 900
+  - schedule:
+      name: "{{{produce}}}"
+      disabled: {{{produce_disabled}}}
+      cron: "{{{produce_cronexp}}}"
+      script_url: https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/cron-sync-artifacts.min.js
+      timeout: 900
+      arguments:
+        _compat.$argument: "sub={{{produce_sub}}}&col={{{produce_col}}}"
+  - http_request:
+      name: BoxJS
+      match: '^https?://(.+\.)?boxjs\.(com|net)'
+      script_url: https://raw.githubusercontent.com/chavyleung/scripts/master/box/chavy.boxjs.js
+      body_required: true
+      timeout: 120
+
+mitm:
+  hostnames:
+    includes:
+      - script.hub
+      - '*.script.hub'
+      - sub.store
+      - boxjs.com
+      - boxjs.net
+      - '*.boxjs.com'
+      - '*.boxjs.net'
