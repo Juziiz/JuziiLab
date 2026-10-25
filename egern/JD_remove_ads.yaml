@@ -1,0 +1,67 @@
+name: 京东去广告
+description: 移除京东开屏广告，精简我的页面产品推广。在京东商品详情页可查看历史价格。首次使用需先安装慢慢买 App，打开慢慢买的我的页面捕获令牌（提示获取ck成功），之后商品详情页才能查看比价。捕获令牌开关只管捕获，不管比价显示。
+author: RuCu6, WeiGiegie, wish
+homepage: https://github.com/Juziiz/JuziiLab
+icon: https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/App_icon/120px/JD.png
+
+compat_arguments:
+  capture_disabled: false
+
+compat_arguments_schema:
+  capture_disabled:
+    name: 捕获令牌
+    description: 只管捕获令牌，不管比价显示。false 为开启捕获（默认），true 为关闭捕获。关闭后打开慢慢买不再弹获取ck提示，但京东详情页的比价照常显示（用之前抓过的令牌），去广告部分不受影响。令牌过期了再改回 false，去慢慢买的我的页面抓一次。
+    default_value: "false"
+    options:
+      - "false"
+      - "true"
+
+rules:
+  - domain:
+      match: dns.jd.com
+      policy: REJECT
+  - ip_cidr:
+      match: 101.124.19.122/32
+      policy: REJECT
+  - ip_cidr6:
+      match: "2402:db40:5100:1011::5/128"
+      policy: REJECT
+  - url_regex:
+      match: '^http://\w{32}\.jddebug\.com/diagnose\?'
+      policy: REJECT
+
+map_locals:
+  - match: '^https://api\.m\.jd\.com/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06])'
+    status_code: 200
+    body: '{}'
+  - match: '^https?://m\.360buyimg\.com/mobilecms/s1125x2436_jfs'
+    status_code: 200
+    body: ' '
+
+scriptings:
+  - http_response:
+      name: 移除京东广告
+      match: '^https://api\.m\.jd\.com/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome)'
+      script_url: https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/JD/JD_remove_ads.js
+      body_required: true
+      timeout: 10
+  - http_request:
+      name: 捕获令牌
+      match: '^https?://apapia-sqk-weblogic\.manmanbuy\.com/baoliao/center/menu$'
+      script_url: https://raw.githubusercontent.com/wf021325/qx/main/js/jd_price.js
+      body_required: true
+      timeout: 10
+      disabled: {{{capture_disabled}}}
+  - http_response:
+      name: 京东比价
+      match: '^https?://in\.m\.jd\.com/product/graphext/\d+\.html'
+      script_url: https://raw.githubusercontent.com/wf021325/qx/main/js/jd_price.js
+      body_required: true
+      timeout: 10
+
+mitm:
+  hostnames:
+    includes:
+      - in.m.jd.com
+      - m.360buyimg.com
+      - apapia-sqk-weblogic.manmanbuy.com
