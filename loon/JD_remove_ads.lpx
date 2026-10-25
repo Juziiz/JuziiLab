@@ -1,5 +1,5 @@
 #!name=京东去广告
-#!desc=移除京东开屏广告，精简我的页面产品推广。在京东商品详情页可查看历史价格。
+#!desc=移除京东开屏广告，精简我的页面产品推广。在京东商品详情页可查看历史价格。首次使用需先安装慢慢买 App，打开慢慢买的我的页面捕获令牌（提示获取ck成功），之后商品详情页才能查看比价。捕获令牌开关只管捕获，不管比价显示。
 #!author=RuCu6[https://github.com/RuCu6], WeiGiegie[https://github.com/WeiGiegie], wish[https://github.com/mist-whisper]
 #!tag=去广告
 #!system=iOS iPadOS
@@ -8,6 +8,9 @@
 #!homepage=https://github.com/Juziiz/JuziiLab
 #!icon=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Icon/App_icon/120px/JD.png
 #!date=2026-02-02 20:35:00
+
+[Argument]
+captureCK=switch,true,tag=捕获令牌
 
 [Rule]
 DOMAIN, dns.jd.com, REJECT
@@ -24,7 +27,8 @@ URL-REGEX, "^http:\/\/\w{32}\.jddebug\.com\/diagnose\?", REJECT
 
 [Script]
 http-response ^https:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome) script-path = https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/JD/JD_remove_ads.js, requires-body = true, tag = 移除京东广告
-http-response ^https?:\/\/in\.m\.jd\.com\/product\/graphext\/\d+\.html script-path = https://raw.githubusercontent.com/Juziiz/JuziiLab/main/deps/resource.wuyra.com/Script/JD/JD_Price.js, requires-body = true, tag = 京东比价
+http-request ^https?:\/\/apapia-sqk-weblogic\.manmanbuy\.com\/baoliao\/center\/menu$ script-path = https://raw.githubusercontent.com/wf021325/qx/main/js/jd_price.js, requires-body = true, timeout=10, enable={captureCK}, tag = 捕获令牌
+http-response ^https?:\/\/in\.m\.jd\.com\/product\/graphext\/\d+\.html script-path = https://raw.githubusercontent.com/wf021325/qx/main/js/jd_price.js, requires-body = true, timeout=10, tag = 京东比价
 
 [MITM]
-hostname=in.m.jd.com, m.360buyimg.com
+hostname=in.m.jd.com, m.360buyimg.com, apapia-sqk-weblogic.manmanbuy.com
