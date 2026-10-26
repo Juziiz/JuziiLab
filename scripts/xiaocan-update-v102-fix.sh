@@ -1,9 +1,12 @@
 #!/bin/bash
 # 小蚕小帮手 一键更新脚本 v1.0.2 热补丁专版（华为云 Flexus 那套专用）
 # 本版 = xiaocan-update.sh + 两处改动，专用于从 v1.0.1 升 v1.0.2：
-#   1. 换源码后、重构建前，给 backend/app/core/scheduler.py 补 Set import
-#      （上游 v1.0.2 第 12 行漏 import，第 94 行却用了 Set[str]，不补则
-#       模块加载即 NameError、/health 通不过、脚本会回滚；补一行即可）
+#   1. 换源码后、重构建前，补齐上游 v1.0.2 漏掉的 typing import（共 3 个）：
+#      scheduler.py：漏 Set（第 94 行用 Set[str]）、漏 List（第 135 行
+#      返回标注 List[str]）；appointment_worker.py：漏 Tuple（第 416 行
+#      返回标注 Tuple[bool, bool]）。任一漏掉，模块加载即 NameError、
+#      /health 通不过、脚本会回滚；只补 Set 会接着报 List，再补 List
+#      还会接着报 Tuple，所以本版一次补齐 3 个，不再逐个打补丁。
 #   2. 本轮不重打旧 fix5/fix6/fix9/fix11（它们针对老版 scheduler/endpoints，
 #      新版已重写、锚点对不上，硬打会打坏新版；新版诚实状态补丁另行做）
 # 其余流程与原脚本一致：备份、保留 data/nginx/.htpasswd/override、失败回滚。
@@ -290,15 +293,26 @@ services:
 OVERRIDE
 fi
 
-# ---------- 6.5 v1.0.2 热补丁：scheduler.py 补 Set import ----------
-FIX102_REL="backend/app/core/scheduler.py"
-if grep -q "from typing import Dict, Any, Optional, Tuple" "$APP_DIR/$FIX102_REL" && ! grep -q "from typing import.*Set" "$APP_DIR/$FIX102_REL"; then
-  say "打 v1.0.2 热补丁：给 scheduler.py 补 Set import…"
-  sed -i 's/from typing import Dict, Any, Optional, Tuple/from typing import Dict, Any, Optional, Tuple, Set/' "$APP_DIR/$FIX102_REL" || die "热补丁写入失败，已中止（数据未动，可重跑）"
-fi
-grep -q "from typing import.*Set" "$APP_DIR/$FIX102_REL" || die "热补丁未生效：scheduler.py 里仍无 Set import，已中止"
-python3 -m py_compile "$APP_DIR/$FIX102_REL" || die "热补丁后 scheduler.py 编译失败，已中止"
-say "v1.0.2 热补丁已生效：scheduler.py 已含 Set import"
+# ---------- 6.5 v1.0.2 热补丁：补齐漏掉的 typing import（3 个） ----------
+# scheduler.py: Set + List；appointment_worker.py: Tuple
+FIX102_SCHED="backend/app/core/scheduler.py"
+FIX102_APPT="backend/app/core/appointment_worker.py"
+say "打 v1.0.2 热补丁：补齐 scheduler.py 的 Set/List、appointment_worker.py 的 Tuple…"
+python3 - "$APP_DIR/$FIX102_SCHED" "$APP_DIR/$FIX102_APPT" <<'PYEOF' || die "热补丁写入失败，已中止（数据未动，可重跑）"
+import pathlib, sys, re
+sched = pathlib.Path(sys.argv[1]); appt = pathlib.Path(sys.argv[2])
+t = sched.read_text()
+t = re.sub(r"from typing import [^\n]*", "from typing import Dict, Any, Optional, Tuple, Set, List", t, count=1)
+sched.write_text(t)
+u = appt.read_text()
+u = re.sub(r"from typing import [^\n]*", "from typing import Optional, Dict, Any, Tuple", u, count=1)
+appt.write_text(u)
+PYEOF
+grep -q "from typing import.*Set" "$APP_DIR/$FIX102_SCHED" || die "热补丁未生效：scheduler.py 里仍无 Set import，已中止"
+grep -q "from typing import.*List" "$APP_DIR/$FIX102_SCHED" || die "热补丁未生效：scheduler.py 里仍无 List import，已中止"
+grep -q "from typing import.*Tuple" "$APP_DIR/$FIX102_APPT" || die "热补丁未生效：appointment_worker.py 里仍无 Tuple import，已中止"
+python3 -m py_compile "$APP_DIR/$FIX102_SCHED" "$APP_DIR/$FIX102_APPT" || die "热补丁后编译失败，已中止"
+say "v1.0.2 热补丁已生效：scheduler.py 已含 Set/List，appointment_worker.py 已含 Tuple"
 
 # ---------- 7. 重构建 + 验活 ----------
 say "重构建并启动（约 3-10 分钟）…"
