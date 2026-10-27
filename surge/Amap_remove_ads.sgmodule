@@ -1,14 +1,20 @@
 #!name=高德地图去广告
-#!desc=移除开屏广告、首页推荐、搜索推荐、打车广告、地点推荐及广告，精简我的页面。
-#!author=可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
+#!desc=移除开屏广告、首页推荐、搜索推荐、打车广告、地点推荐及广告，精简我的页面。由 Kelee 版（jq 精修）与 ddgksf2013 版（脚本）合并而成。
+#!author=可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md], ddgksf2013[https://github.com/ddgksf2013]
 #!homepage=https://hub.kelee.one
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Amap.png
 #!category=去广告
-#!date=2026-10-28 05:15:00
+#!date=2026-10-28 05:30:00
 
-# 注意：源文件中有 2 条引用远端 .jq 文件的改写，Surge 的 http-response-jq 只支持内联 jq，不支持远端 jq 链接，
-# 且 kelee.one 在本机拉取时返回 Cloudflare 403，无法拿到那 2 份 .jq 的原文，故未凭空编造，已如实省略，
-# 对应接口的其余内联改写仍保留，不影响正常使用，详见正文中的注释。
+# 合并说明：
+# - Kelee 版：Map Local 7 条 + Body Rewrite 14 条（内联 jq），2 条远端 .jq 因 Surge 不支持远端 jq 且 kelee.one 返回 403 拿不到原文，已省略，见原文件注释。
+# - ddgksf2013 版：规则 1 条 + Map Local 8 条 + 脚本 10 条（amap.js 9 条、amdc.js 1 条，脚本均在 GitHub raw 上可访问）。
+# - 冲突处理：ddgksf 版对 scene/recommend 是整条返回 {}，会覆盖 Kelee 版对该接口的精细过滤（只留部分推荐），合并后以整条屏蔽为准；
+#   promotion-web/resource、valueadded 开屏已有 Map Local 屏蔽，对应脚本条目会被屏蔽覆盖，不影响结果，仍保留以备 Map Local 失效时兜底。
+# - 脚本重命名：ddgksf 原版 9 条 amap 脚本同名，Surge 下同名可能互相覆盖，合并后按接口改成不同名字，保证 9 条都生效。
+
+[Rule]
+DOMAIN-SUFFIX,optimus-ads.amap.com,DIRECT
 
 [Map Local]
 ^https:\/\/m5\.amap\.com\/ws\/valueadded\/alimama\/splash_screen\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -18,10 +24,17 @@
 ^https:\/\/m5-zb\.amap\.com\/ws\/promotion-web\/resource(\/home)?\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/m5\.amap\.com\/ws\/info_bff\/rankingCard\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/m5\.amap\.com\/ws\/shield\/search_business\/process\/marketingOperationStructured\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/.*\.amap\.com\/ws\/aos\/alimama\/splash_screen data-type=text data=" " status-code=200
+^https?:\/\/.*\.amap\.com\/v\d\/ai_rec\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/.*\.amap\.com\/ws\/faas\/amap-navigation\/card-service-route-plan\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/.*\.amap\.com\/ws\/boss\/order_web\/\w{8}_information data-type=text data=" " status-code=200
+^https?:\/\/.*\.amap\.com\/ws\/shield\/scene\/recommend data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/.*\.amap\.com\/uploadimg\/\w+\.gif data-type=text data="" status-code=200
+^https?:\/\/.*\.amap\.com\/ws\/valueadded\/weather data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/.*\.amap\.com\/ws\/asa\/ads_attribution data-type=text data="" status-code=404
 
 [Body Rewrite]
 http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/frogserver\/aocs\/updatable\/1\? 'delpaths([["data","adStatementConfig"],["data","adCustomerRetainArchitecture"],["data","adImEntryConfig"],["data","adVenueConfig"],["data","adPerfSwitch"],["data","EndNaviC3AdCard"],["data","infoCpcReport"],["data","hotsaleConfig"],["data","marketing_resource_config"],["data","coupon_risk_asac"],["data","commonCouponSceneLog"],["data","sug_coupon_opt"],["data","giftEntryConfig"],["data","splashscreen"],["data","SplashScreenControl"],["data","splashview_config"],["data","feedback_banner"],["data","TrainOrderBanner"],["data","nearby_business_popup"],["data","shortcut_popup_frequency"],["data","tel_retention_popup"],["data","hotel_activity"],["data","taxi_activity"],["data","hotel_privilege"],["data","sportsActivityConfig"],["data","activity_qingke_contry_control"],["data","920bestwishes"],["data","custom_consultdata","widget_guide"],["data","free_ride"],["data","homepage_resource_config"],["data","home_message_guide"],["data","hotel_tipsicon"],["data","sur_bar"],["data","nearby_map_entry_guide"],["data","comment_info"],["data","small_biz_index"],["data","small_biz_fun"],["data","setpagesearch"],["data","wallet"]])'
-# 以下为源文件第 2 条 updatable/1? 改写：引用远端 https://kelee.one/Resource/JQLang/Amap/updatable.jq，Surge 不支持远端 jq，且该站返回 403 拿不到原文，故省略，未编造。
 http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/dsp\/profile\/index\/nodefaasv3\? 'del(.data.tipData, .data.wallet) | .data.cardList |= map(select(.dataKey == "MineNewFootprintCard" or .dataKey == "MineNewBEntranceCardV4")) | (.data.cardList[] | select(.dataKey == "MineNewBEntranceCardV4") | .content.entranceList_1) |= map(select(.id == 7 or .id == 8 or .id == 10 or .id == 17)) | (.data.cardList[] | select(.dataKey == "MineNewBEntranceCardV4") | .content.entranceList_2) |= map(select(.id == 32 or .id == 4 or .id == 9 or .id == 16 or .id == 14))'
 http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/scene\/recommend\? 'delpaths([["$","data","shadingWords"]])'
 http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/scene\/recommend\? '.data.toolsRecommend.data.default |= map(select(.id == 102 or .id == 103 or .id == 106 or .id == 151))'
@@ -34,8 +47,19 @@ http-response-jq ^https:\/\/center\.amap\.com\/ws\/amc\/server\/conv\/raise_list
 http-response-jq ^https:\/\/m5\.amap\.com\/ws\/shield\/scene\/recommend\? '(if (try (.data.shadingWords.data.regions.content | type == "array") catch false) then .data.shadingWords.data.regions.content |= map(select(IN("quickLink","history","searchFind"))) else . end) | (if (try (.data.shadingWords.data.modules | type == "object") catch false) then .data.shadingWords.data.modules |= with_entries(select(.key == "searchFind")) else . end)'
 http-response-jq ^https:\/\/info\.amap\.com\/ws\/shield\/search_business\/process\/middleLayer\/sug\? '.tip_list |= map(select(.tip.task_tag == "common_content_general" or .tip.task_tag == "sp"))'
 http-response-jq ^https:\/\/info\.amap\.com\/ws\/shield\/search\/poi\/detail\? 'delpaths([["data","modules","combineReviews","data","write_comment","btnRightTag"],["data","modules","combineReviews","data","write_comment","title"]])'
-# 以下为源文件 poi/detail 的第 2 条改写：引用远端 https://kelee.one/Resource/JQLang/Amap/search_poi_detail.jq，Surge 不支持远端 jq，且该站返回 403 拿不到原文，故省略，未编造。
 http-response-jq ^https:\/\/m5\.amap\.com\/ws\/smartui\/near_recommend\? 'delpaths([["data","operation_activity"]])'
 
+[Script]
+amdc = type=http-response, pattern=^http:\/\/amdc\.m\.taobao\.com, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amdc.js, requires-body=true
+amap-notice-list = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/message\/notice\/list, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-updatable = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/shield\/frogserver\/aocs\/updatable, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-nearbyrec = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/shield\/search\/nearbyrec_smart, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-promotion = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/promotion-web\/resource, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-main-page = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/faas\/amap-navigation\/main-page, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-splash = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/valueadded\/alimama\/splash_screen, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-msgbox = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/msgbox\/pull, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-profile = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/shield\/dsp\/profile\/index\/nodefaas, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+amap-hotword = type=http-response, pattern=^https?:\/\/.*\.amap\.com\/ws\/shield\/search\/new_hotword, script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/refs/heads/master/amap.js, requires-body=true
+
 [MITM]
-hostname = %APPEND% m5.amap.com, ai.amap.com, m5-zb.amap.com, center.amap.com, sns.amap.com, info.amap.com
+hostname = %APPEND% m5.amap.com, ai.amap.com, m5-zb.amap.com, center.amap.com, sns.amap.com, info.amap.com, amap-aos-info-nogw.amap.com
