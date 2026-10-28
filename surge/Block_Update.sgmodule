@@ -1,0 +1,20 @@
+#!name=屏蔽 iOS/iPadOS 系统更新
+#!desc=屏蔽 iOS/iPadOS 系统更新，无 iPad 设备可在「主机名」添加「-mesu.apple.com」
+#!author=ConnersHua
+#!homepage=https://github.com/Tartarus2014/Loon-Script
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+#!category=屏蔽更新
+#!date=2026-10-29 03:57:00
+
+# 源文件：Tartarus2014/Loon-Script Plugin/Block/Block Update.lpx
+# Loon 原版 [URL Rewrite] 为：request if ${url} ~= /^https:\/\/mesu\.apple\.com\/assets\/com_apple_MobileAsset_SoftwareUpdate\/com_apple_MobileAsset_SoftwareUpdate\.xml/i then reject(404)
+# Surge 转写为下方 - reject-404，作用相同：拦截 iPadOS 系统更新描述文件请求并返回 404。
+
+[Rule]
+DOMAIN,gdmf.apple.com,REJECT
+
+[URL Rewrite]
+^https://mesu\.apple\.com/assets/com_apple_MobileAsset_SoftwareUpdate/com_apple_MobileAsset_SoftwareUpdate\.xml - reject-404
+
+[MITM]
+hostname = %APPEND% mesu.apple.com
