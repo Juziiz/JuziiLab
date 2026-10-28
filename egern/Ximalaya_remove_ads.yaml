@@ -10,6 +10,7 @@ scriptings:
       match: '^https?:\/\/.+((ximalaya)|(xmcdn)).+(mobile-user\/v2\/homePage|product\/detail\/v1|v1\/album\/track\/ts|mobile-playpage\/track\/v4\/baseInfo\/ts|mobile-playpage\/playpage\/tabs\/v2|mobile-playpage\/playpage\/track\/qualityAndEffect|mobile\/download\/v2\/track|mobile-user-grade\/decoratorV2\/decorationDetails\/page|mobile-album\/album\/plant\/grass)'
       script_url: https://resource.wuyra.com/Script/Himalaya/Himalaya.js
       body_required: true
+      timeout: 60
 
 url_rewrites:
   - match: '^https?:\/\/passport\.ximalaya\.com\/friendship-mobile\/v1\/findFriendsBanner\/show\/'
@@ -24,12 +25,20 @@ url_rewrites:
     location: "http://reject/"
   - match: '^https?:\/\/ulogs\.umeng\.com\/unify_logs'
     location: "http://reject/"
-  - match: '^https?:\/\/.+ximalaya\.com\/x-web-activity\/signIn\/getHomePageSignInInfo\/'
-    location: "http://reject-200/"
-  - match: '^https?:\/\/.+ximalaya\.com\/product\/promotion\/v1\/album\/price'
-    location: "http://reject-200/"
   - match: '^https?:\/\/mobile\.ximalaya\.com\/business-sale-promotion-guide-mobile-web\/popup\/info\/'
     location: "http://reject/"
+
+map_locals:
+  - match: '^https?:\/\/.+ximalaya\.com\/x-web-activity\/signIn\/getHomePageSignInInfo\/'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: ' '
+  - match: '^https?:\/\/.+ximalaya\.com\/product\/promotion\/v1\/album\/price'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: ' '
 
 mitm:
   hostnames:
