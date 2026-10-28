@@ -98,7 +98,7 @@ def deepseek_balance():
             f"其中充值余额 {info.get('topped_up_balance', '?')}，"
             f"赠送余额 {info.get('granted_balance', '?')}"
         )
-    return "你 DeepSeek 账号的余额是：" + "；".join(parts) + "。注意这是金额余额，不是 token 个数，聊天是按 token 换算扣这个余额的。"
+    return "你 DeepSeek 账号的余额是：" + "；".join(parts) + "。关于 token：DeepSeek 不直接给剩余 token 数，token 不是固定额度，是聊天时按输入/输出价格从上面这个金额余额里扣的，余额用完就没 token 可用了，所以查余额就是查你还能用多少 token。"
 
 
 async def main():
@@ -135,7 +135,7 @@ async def main():
             if text == "/reset":
                 history = [{"role": "system", "content": SYSTEM_PROMPT}]
                 reply = "已清空上下文，重新开始聊吧。"
-            elif any(k in text for k in ("余额", "还剩", "剩多少", "多少钱", "balance")):
+            elif any(k in text.lower() for k in ("余额", "还剩", "剩多少", "多少钱", "balance", "token", "还有多少")):
                 try:
                     reply = deepseek_balance()
                 except Exception as exc:
