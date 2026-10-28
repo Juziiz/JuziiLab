@@ -59,6 +59,7 @@ NAPCAT_WS = os.environ.get("NAPCAT_WS", "ws://napcat:3001")
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
 ALLOWED_USER_ID = os.environ.get("ALLOWED_USER_ID", "")
+NAPCAT_TOKEN = os.environ.get("NAPCAT_TOKEN", "")
 HISTORY_LIMIT = 20
 
 
@@ -83,7 +84,15 @@ async def main():
         print("missing DEEPSEEK_API_KEY or ALLOWED_USER_ID", file=sys.stderr)
         return 2
     history = []
-    async with websockets.connect(NAPCAT_WS, max_size=10 * 1024 * 1024) as ws:
+    ws_url = NAPCAT_WS
+    headers = {}
+    if NAPCAT_TOKEN:
+        if "?" in ws_url:
+            ws_url += "&access_token=" + NAPCAT_TOKEN
+        else:
+            ws_url += "?access_token=" + NAPCAT_TOKEN
+        headers["Authorization"] = "Bearer " + NAPCAT_TOKEN
+    async with websockets.connect(ws_url, max_size=10 * 1024 * 1024, additional_headers=headers) as ws:
         print("connected to NapCat", flush=True)
         async for raw in ws:
             try:
@@ -125,6 +134,7 @@ async def main():
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(main()))
+
 PYEOF
 if [ ! -f .env ]; then
   read -p "跟机器人私聊的那个QQ号（只回这个号，其他号不回）: " ALLOWED_USER_ID
