@@ -81,6 +81,26 @@ def deepseek_reply(history):
     return result["choices"][0]["message"]["content"]
 
 
+def deepseek_balance():
+    request = urllib.request.Request(
+        "https://api.deepseek.com/user/balance", method="GET",
+    )
+    request.add_header("Authorization", "Bearer " + DEEPSEEK_API_KEY)
+    with urllib.request.urlopen(request, timeout=30) as response:
+        result = json.loads(response.read().decode())
+    infos = result.get("balance_infos", [])
+    if not infos:
+        return "查不到余额信息，可能是接口返回为空。"
+    parts = []
+    for info in infos:
+        parts.append(
+            f"{info.get('currency', 'CNY')} 总余额 {info.get('total_balance', '?')}，"
+            f"其中充值余额 {info.get('topped_up_balance', '?')}，"
+            f"赠送余额 {info.get('granted_balance', '?')}"
+        )
+    return "你 DeepSeek 账号的余额是：" + "；".join(parts) + "。注意这是金额余额，不是 token 个数，聊天是按 token 换算扣这个余额的。"
+
+
 async def main():
     if not DEEPSEEK_API_KEY or not ALLOWED_USER_ID:
         print("missing DEEPSEEK_API_KEY or ALLOWED_USER_ID", file=sys.stderr)
@@ -115,6 +135,12 @@ async def main():
             if text == "/reset":
                 history = [{"role": "system", "content": SYSTEM_PROMPT}]
                 reply = "已清空上下文，重新开始聊吧。"
+            elif any(k in text for k in ("余额", "还剩", "剩多少", "多少钱", "balance")):
+                try:
+                    reply = deepseek_balance()
+                except Exception as exc:
+                    print("balance error:", exc, flush=True)
+                    reply = "余额查不出来，可能是接口出错了，你去 DeepSeek 官网看一下余额。"
             else:
                 history.append({"role": "user", "content": text})
                 history = [history[0]] + history[1:][-HISTORY_LIMIT:]
