@@ -85,7 +85,7 @@ async def main():
     if not DEEPSEEK_API_KEY or not ALLOWED_USER_ID:
         print("missing DEEPSEEK_API_KEY or ALLOWED_USER_ID", file=sys.stderr)
         return 2
-    history = []
+    history = [{"role": "system", "content": SYSTEM_PROMPT}]
     ws_url = NAPCAT_WS
     headers = {}
     if NAPCAT_TOKEN:
