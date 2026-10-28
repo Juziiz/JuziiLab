@@ -1,19 +1,21 @@
 #!name=拼多多去广告
 #!desc=移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
-#!author=ZenmoFeiShi[https://github.com/ZenmoFeiShi], 可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
+#!author=ZenmoFeiShi, 可莉
 #!homepage=https://hub.kelee.one
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!category=去广告
-#!date=2026-10-29 06:10:00
+#!date=2026-10-29 06:42:00
 
-# 2026-10-29 修正：上版把 Loon 里同一 URL 的多条 jq 拆成了多条 Surge http-response-jq，
-# Surge 对同一 URL 很可能只执行第一条匹配的改写，导致拆分后的后几条（底栏、个人中心、会场等）根本没跑，
-# 这就是 Loon 能用、Surge 去不掉的原因。本版把同一 URL 的所有 jq 用 | 合并成一条，逐 URL 一一对应原版。
+# 2026-10-29 修正：原版转 Surge 不完整，缺了“拦 QUIC 逼 TCP”这一环。
+# 本版补两处：① QUIC 规则改成 UDP 版（Surge 手册：PROTOCOL,UDP 也匹配 QUIC，且比 QUIC 关键字认得更全），
+# 逼 api.pinduoduo.com 回 TCP；② 7 条 jq 另加一个 JS 脚本版，绕过 Surge Body Rewrite iOS 1MB 上限，
+# 大 Body 也能改，jq 和脚本做同一件事，重复跑也是幂等的。
 
 [Rule]
 AND,((URL-REGEX,"^http://((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/d(\d)?"),(USER-AGENT,"*com.xunmeng.pinduoduo*")),REJECT
 AND,((URL-REGEX,"^http://\[[0-9a-fA-F:]+\]/d(\d)?\?"),(USER-AGENT,"*com.xunmeng.pinduoduo*")),REJECT
 AND,((DOMAIN,api.pinduoduo.com),(PROTOCOL,QUIC)),REJECT
+AND,((DOMAIN,api.pinduoduo.com),(PROTOCOL,UDP)),REJECT
 DOMAIN,titan.pinduoduo.com,REJECT
 DOMAIN,xg.pinduoduo.com,REJECT
 DOMAIN,cdl-1.pddpic.com,REJECT
@@ -60,6 +62,7 @@ http-response-jq ^https:\/\/api\.pinduoduo\.com\/order\/ 'delpaths([["marketing_
 http-response-jq ^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\? '.orders |= map(.order_buttons |= map(del(.order_growth_tip)))'
 
 [Script]
+拼多多去广告脚本版 = type=http-response, pattern=^https:\/\/api\.pinduoduo\.com\/(api\/alexa\/homepage\/hub\?|search\?|api\/philo\/personal\/hub\?|api\/oak\/integration\/render\?|api\/caterham\/v3\/query\/order_detail_group\?|order\/|api\/aristotle\/order_list_v4\?), script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/surge/PinDuoDuo_remove_ads.js, requires-body=true, max-size=-1
 移除扫码取件页面商品推荐及弹窗 = type=http-response, pattern=^https:\/\/m\.pinduoduo\.net\/mdkd\/package\?from_app_scan, script-path=https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js, requires-body=true
 
 [MITM]
