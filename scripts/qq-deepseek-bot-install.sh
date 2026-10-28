@@ -136,6 +136,11 @@ if __name__ == "__main__":
     raise SystemExit(asyncio.run(main()))
 
 PYEOF
+if [ -f .env ] && ! grep -q NAPCAT_TOKEN .env; then
+  read -p "NapCat WebSocket Token（服务器上输入）: " NAPCAT_TOKEN
+  printf "NAPCAT_TOKEN=%s\n" "$NAPCAT_TOKEN" >> .env
+  chmod 600 .env
+fi
 if [ ! -f .env ]; then
   read -p "跟机器人私聊的那个QQ号（只回这个号，其他号不回）: " ALLOWED_USER_ID
   read -s -p "DeepSeek API Key（服务器上输入，不会回显，也不要发给任何人）: " DEEPSEEK_API_KEY
