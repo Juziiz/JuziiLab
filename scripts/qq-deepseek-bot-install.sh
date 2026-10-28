@@ -61,6 +61,7 @@ DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
 ALLOWED_USER_ID = os.environ.get("ALLOWED_USER_ID", "")
 NAPCAT_TOKEN = os.environ.get("NAPCAT_TOKEN", "")
+SYSTEM_PROMPT = os.environ.get("SYSTEM_PROMPT", "你是一个温柔体贴、很会关心人的聊天伙伴，性格软萌可爱。说话温柔亲切，先关心用户的感受再回答，语气词和可爱表情适量，不要生硬，不要说教。回答尽量简短亲切，除非用户要求详细。")
 HISTORY_LIMIT = 20
 
 
@@ -112,11 +113,11 @@ async def main():
             if not text:
                 continue
             if text == "/reset":
-                history = []
+                history = [{"role": "system", "content": SYSTEM_PROMPT}]
                 reply = "已清空上下文，重新开始聊吧。"
             else:
                 history.append({"role": "user", "content": text})
-                history = history[-HISTORY_LIMIT:]
+                history = [history[0]] + history[1:][-HISTORY_LIMIT:]
                 try:
                     reply = deepseek_reply(history)
                 except Exception as exc:
@@ -125,7 +126,7 @@ async def main():
                     history.pop()
                     continue
                 history.append({"role": "assistant", "content": reply})
-                history = history[-HISTORY_LIMIT:]
+                history = [history[0]] + history[1:][-HISTORY_LIMIT:]
             await ws.send(json.dumps({
                 "action": "send_private_msg",
                 "params": {"user_id": int(ALLOWED_USER_ID), "message": reply},
