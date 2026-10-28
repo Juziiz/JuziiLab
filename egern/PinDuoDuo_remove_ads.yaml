@@ -1,0 +1,190 @@
+name: 拼多多去广告
+description: 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
+author: ZenmoFeiShi, 可莉
+homepage: https://hub.kelee.one
+icon: https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
+
+rules:
+  - url_regex:
+      match: '^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?'
+      policy: REJECT
+  - url_regex:
+      match: '^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?'
+      policy: REJECT
+  - domain:
+      match: titan.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: xg.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: cdl-1.pddpic.com
+      policy: REJECT
+  - domain:
+      match: cdl-p2.pddpic.com
+      policy: REJECT
+  - domain:
+      match: cd-1.pddpic.com
+      policy: REJECT
+  - domain:
+      match: apm.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: th-b.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: ta.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: th.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: th-a.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: ta-a.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: meta.pinduoduo.com
+      policy: REJECT
+  - domain:
+      match: apm-a.pinduoduo.com
+      policy: REJECT
+
+map_locals:
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/query_order_list_tabs_element\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/aquarius\/hungary\/global\/homepage\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_express_group\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/search_hotquery\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/new_chat_group\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/alexa\/goods\/back_up\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/personal\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/brand-olay\/goods_detail\/bybt_guide\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/engels\/reviews\/require\/append\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/my_order_group\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/likes\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/phantom\/gbdbpdv\/extra\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/manufacturer\/cross\/shortcut\/list\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/dunkirk\/liveactivity\/push\/create\/url\/report\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/growth\/nagato\/app\/index\/gather\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/engels\/wait\/receive\/review\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/buffon\/nasus\/recommend\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+  - match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v2\/query\/goods_detail_with_tags\?'
+    status_code: 200
+    headers:
+      Content-Type: application/json
+    body: '{}'
+
+body_rewrites:
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?'
+      filter: 'delpaths([["result","dy_module","irregular_banner_dy"],["result","icon_set"],["result","search_bar_hot_query"]]) | .result.bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.all_top_opts |= map(del(.selected_image, .image, .height, .width))'
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/search\?'
+      filter: 'delpaths([["expansion"]])'
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/api\/philo\/personal\/hub\?'
+      filter: 'delpaths([["monthly_card_entrance"],["personal_center_style_v2_vo"],["icon_set","icons"],["icon_set","top_personal_icons"],["personal_banner"]])'
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/api\/oak\/integration\/render\?'
+      filter: 'delpaths([["bottom_section_list"],["ui","bottom_section"],["ui","live_section","float_info"]])'
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v3\/query\/order_detail_group\?'
+      filter: 'delpaths([["data","goods_list"]])'
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/order\/'
+      filter: 'delpaths([["marketing_banner_vo"],["shipping","banner_above_recommend"]])'
+  - response_jq:
+      match: '^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\?'
+      filter: '.orders |= map(.order_buttons |= map(del(.order_growth_tip)))'
+
+scriptings:
+  - http_response:
+      name: 移除扫码取件页面商品推荐及弹窗
+      match: '^https:\/\/m\.pinduoduo\.net\/mdkd\/package\?from_app_scan'
+      script_url: https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js
+      body_required: true
+      timeout: 20
+
+mitm:
+  hostnames:
+    - api.pinduoduo.com
+    - m.pinduoduo.net
