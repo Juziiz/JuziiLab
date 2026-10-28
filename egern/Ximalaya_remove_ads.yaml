@@ -1,14 +1,14 @@
-name: 喜马拉雅
+name: 喜马拉雅去广告
 icon: https://resource.wuyra.com/Icon/App_icon/120px/Himalaya.png
-description: 喜马拉雅+会员调试，含会员解锁、大师课、音质/音效/下载/播放器皮肤及去广告。
+description: 解锁喜马拉雅会员，移除开屏广告、播放器广告，精简频道和我的页面。
 author: WeiGiegie
-homepage: https://t.me/GieGie777
+homepage: https://kelvinlab.wuyra.com
 
 scriptings:
   - http_response:
-      name: 喜马拉雅+会员解锁+大师课+音质/音效/下载/播放器皮肤
+      name: 喜马拉雅会员
       match: '^https?:\/\/.+((ximalaya)|(xmcdn)).+(mobile-user\/v2\/homePage|product\/detail\/v1|v1\/album\/track\/ts|mobile-playpage\/track\/v4\/baseInfo\/ts|mobile-playpage\/playpage\/tabs\/v2|mobile-playpage\/playpage\/track\/qualityAndEffect|mobile\/download\/v2\/track|mobile-user-grade\/decoratorV2\/decorationDetails\/page|mobile-album\/album\/plant\/grass)'
-      script_url: https://raw.githubusercontent.com/WeiGiegie/666/main/ximalaya.js
+      script_url: https://resource.wuyra.com/Script/Himalaya/Himalaya.js
       body_required: true
 
 url_rewrites:
