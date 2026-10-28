@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 cd /opt/qq-deepseek-bot 2>/dev/null || mkdir -p /opt/qq-deepseek-bot && cd /opt/qq-deepseek-bot
-mkdir -p bot napcat/config napcat/data
+mkdir -p bot napcat/config napcat/data napcat/qq
 cat > docker-compose.yml << 'COMPOSE'
 services:
   napcat:
@@ -16,6 +16,7 @@ services:
     volumes:
       - ./napcat/config:/app/napcat/config
       - ./napcat/data:/app/napcat/data
+      - ./napcat/qq:/app/.config/QQ
     restart: unless-stopped
   bot:
     build: ./bot
