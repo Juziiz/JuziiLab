@@ -5,7 +5,7 @@ mkdir -p bot napcat/config napcat/data
 cat > docker-compose.yml << 'COMPOSE'
 services:
   napcat:
-    image: napneko/napcat:latest
+    image: mlikiowa/napcat-docker:latest
     container_name: napcat
     environment:
       - TZ=Asia/Shanghai
@@ -133,8 +133,8 @@ if [ ! -f .env ]; then
   printf "ALLOWED_USER_ID=%s\nDEEPSEEK_API_KEY=%s\nDEEPSEEK_MODEL=deepseek-chat\n" "$ALLOWED_USER_ID" "$DEEPSEEK_API_KEY" > .env
   chmod 600 .env
 fi
-docker compose up -d --build || docker-compose up -d --build
-docker compose ps || docker-compose ps
+docker compose up -d --build
+docker compose ps
 IP=$(hostname -I | awk '{print $1}')
 echo "NapCat WebUI: http://$IP:6099"
 echo "先在华为云安全组临时放行 6099，打开上面地址扫码登录机器人QQ，登录成功后关掉 6099，只留 22 和业务端口。"
