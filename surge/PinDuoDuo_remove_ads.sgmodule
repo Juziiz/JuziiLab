@@ -4,12 +4,12 @@
 #!homepage=https://hub.kelee.one
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/PinDuoDuo.png
 #!category=去广告
-#!date=2026-10-29 06:42:00
+#!date=2026-10-29 06:51:00
 
-# 2026-10-29 修正：原版转 Surge 不完整，缺了“拦 QUIC 逼 TCP”这一环。
-# 本版补两处：① QUIC 规则改成 UDP 版（Surge 手册：PROTOCOL,UDP 也匹配 QUIC，且比 QUIC 关键字认得更全），
-# 逼 api.pinduoduo.com 回 TCP；② 7 条 jq 另加一个 JS 脚本版，绕过 Surge Body Rewrite iOS 1MB 上限，
-# 大 Body 也能改，jq 和脚本做同一件事，重复跑也是幂等的。
+# 2026-10-29 修正：按 Kelvin 老版的思路，首页不走 jq，首页走作者原版脚本。
+# Kelvin 老版首页脚本就是 kelee 那个 PinDuoDuo_remove_ads.js，之前能用就是靠它。
+# 本版：首页 = kelee 原版脚本；其他页 = jq + 自写 JS 脚本（不含首页，避免同 URL 多脚本冲突）；
+# QUIC/UDP 双拦，逼 api.pinduoduo.com 回 TCP。
 
 [Rule]
 AND,((URL-REGEX,"^http://((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/d(\d)?"),(USER-AGENT,"*com.xunmeng.pinduoduo*")),REJECT
@@ -31,6 +31,7 @@ DOMAIN,meta.pinduoduo.com,REJECT
 DOMAIN,apm-a.pinduoduo.com,REJECT
 
 [Map Local]
+^https:\/\/api\.(?:pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/query_order_list_tabs_element\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/api\.pinduoduo\.com\/api\/aquarius\/hungary\/global\/homepage\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -51,9 +52,9 @@ DOMAIN,apm-a.pinduoduo.com,REJECT
 ^https:\/\/api\.pinduoduo\.com\/api\/engels\/wait\/receive\/review\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/api\.pinduoduo\.com\/api\/buffon\/nasus\/recommend\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/api\.pinduoduo\.com\/api\/caterham\/v2\/query\/goods_detail_with_tags\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https:\/\/api\.pinduoduo\.com\/api\/flow\/hungary\/window\/global\/v2\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 [Body Rewrite]
-http-response-jq ^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","dy_module","irregular_banner_dy"],["result","icon_set"],["result","search_bar_hot_query"]]) | .result.bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.all_top_opts |= map(del(.selected_image, .image, .height, .width))'
 http-response-jq ^https:\/\/api\.pinduoduo\.com\/search\? 'delpaths([["expansion"]])'
 http-response-jq ^https:\/\/api\.pinduoduo\.com\/api\/philo\/personal\/hub\? 'delpaths([["monthly_card_entrance"],["personal_center_style_v2_vo"],["icon_set","icons"],["icon_set","top_personal_icons"],["personal_banner"]])'
 http-response-jq ^https:\/\/api\.pinduoduo\.com\/api\/oak\/integration\/render\? 'delpaths([["bottom_section_list"],["ui","bottom_section"],["ui","live_section","float_info"]])'
@@ -62,8 +63,9 @@ http-response-jq ^https:\/\/api\.pinduoduo\.com\/order\/ 'delpaths([["marketing_
 http-response-jq ^https:\/\/api\.pinduoduo\.com\/api\/aristotle\/order_list_v4\? '.orders |= map(.order_buttons |= map(del(.order_growth_tip)))'
 
 [Script]
-拼多多去广告脚本版 = type=http-response, pattern=^https:\/\/api\.pinduoduo\.com\/(api\/alexa\/homepage\/hub\?|search\?|api\/philo\/personal\/hub\?|api\/oak\/integration\/render\?|api\/caterham\/v3\/query\/order_detail_group\?|order\/|api\/aristotle\/order_list_v4\?), script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/surge/PinDuoDuo_remove_ads.js, requires-body=true, max-size=-1
+精简首页 = type=http-response, pattern=^https:\/\/api\.pinduoduo\.com\/api\/alexa\/homepage\/hub\?, script-path=https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js, requires-body=true
+拼多多去广告其他页 = type=http-response, pattern=^https:\/\/api\.pinduoduo\.com\/(search\?|api\/philo\/personal\/hub\?|api\/oak\/integration\/render\?|api\/caterham\/v3\/query\/order_detail_group\?|order\/|api\/aristotle\/order_list_v4\?), script-path=https://raw.githubusercontent.com/Juziiz/JuziiLab/main/surge/PinDuoDuo_remove_ads.js, requires-body=true, max-size=-1
 移除扫码取件页面商品推荐及弹窗 = type=http-response, pattern=^https:\/\/m\.pinduoduo\.net\/mdkd\/package\?from_app_scan, script-path=https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js, requires-body=true
 
 [MITM]
-hostname = %APPEND% api.pinduoduo.com, m.pinduoduo.net
+hostname = %APPEND% api.pinduoduo.com, api.yangkeduo.com, m.pinduoduo.net
