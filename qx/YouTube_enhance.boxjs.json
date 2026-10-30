@@ -1,0 +1,87 @@
+{
+  "id": "youtube.enhance.boxjs",
+  "name": "YouTube 增强",
+  "author": "@IBL3ND",
+  "icon": "https://iili.io/KQ67Yxa.png",
+  "repo": "https://github.com/IBL3ND/module",
+  "apps": [
+    {
+      "id": "YT_ENHANCE",
+      "name": "YouTube 增强",
+      "keys": [
+        "yt_blockUpload",
+        "yt_blockShorts",
+        "yt_autoHd",
+        "yt_blockGames",
+        "yt_blockVerticalLive",
+        "yt_jumpAhead",
+        "yt_blockStore",
+        "yt_nativeDownload"
+      ],
+      "settings": [
+        {
+          "id": "yt_blockUpload",
+          "name": "隐藏「上传」入口",
+          "val": true,
+          "type": "boolean",
+          "desc": "隐藏导航栏中的「上传」入口"
+        },
+        {
+          "id": "yt_blockShorts",
+          "name": "隐藏「Shorts」入口",
+          "val": true,
+          "type": "boolean",
+          "desc": "隐藏导航栏中的「Shorts」入口"
+        },
+        {
+          "id": "yt_autoHd",
+          "name": "自动最高画质",
+          "val": true,
+          "type": "boolean",
+          "desc": "优先使用最高可用画质，并阻止自动降低画质"
+        },
+        {
+          "id": "yt_blockGames",
+          "name": "隐藏小游戏推荐",
+          "val": true,
+          "type": "boolean",
+          "desc": "隐藏 YouTube Playables（小游戏）推荐"
+        },
+        {
+          "id": "yt_blockVerticalLive",
+          "name": "隐藏竖屏直播推荐",
+          "val": true,
+          "type": "boolean",
+          "desc": "隐藏各界面中的竖屏直播推荐"
+        },
+        {
+          "id": "yt_jumpAhead",
+          "name": "启用 Jump Ahead",
+          "val": true,
+          "type": "boolean",
+          "desc": "启用原生「Jump Ahead」跳转按钮，并去除其推广提示"
+        },
+        {
+          "id": "yt_blockStore",
+          "name": "隐藏商店和购物板块",
+          "val": true,
+          "type": "boolean",
+          "desc": "隐藏视频下方和频道主页中的创作者商店、购物板块"
+        },
+        {
+          "id": "yt_nativeDownload",
+          "name": "原生下载（实验性）",
+          "val": true,
+          "type": "boolean",
+          "desc": "实验性原生下载功能；未设置画质时使用 720p，服务器限制可能仍然生效"
+        }
+      ],
+      "author": "@IBL3ND",
+      "repo": "https://github.com/IBL3ND/module",
+      "icons": [
+        "https://iili.io/KQ67Yxa.png",
+        "https://iili.io/KQ67Yxa.png"
+      ]
+    }
+  ]
+}
